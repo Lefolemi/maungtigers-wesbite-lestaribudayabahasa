@@ -1,35 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.tsx
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-function App() {
-  const [count, setCount] = useState(0)
+import Layout from './components/fixed/Layout';
 
+import Beranda from './routes/Beranda';
+import TentangWebsite from './routes/about/TentangWebsite';
+import Timeline from './routes/about/Timeline';
+import Kamus from './routes/kontribusi/Kamus';
+import Cerita from './routes/kontribusi/Cerita';
+import MaknaKata from './routes/kontribusi/MaknaKata';
+import Artikel from './routes/artikel/Artikel';
+import ArtikelDetail from './routes/artikel/ArtikelDetail';
+import Register from './routes/user/Register';
+import Login from './routes/user/Login';
+import TakDitemukan from './routes/TakDitemukan';
+
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={ <Layout> <Beranda /> </Layout> } />
+        <Route path="/tentang-website" element={<Layout><TentangWebsite /></Layout>} />
+        <Route path="/timeline" element={<Layout><Timeline /></Layout>} />
+        <Route path="/kamus" element={<Layout><Kamus /></Layout>} />
+        <Route path="/cerita" element={<Layout><Cerita /></Layout>} />
+        <Route path="/makna-kata" element={<Layout><MaknaKata /></Layout>} />
+        <Route path="/artikel" element={<Layout><Artikel /></Layout>} />
+        <Route path="/artikel/:slug" element={<ArtikelDetail />} />
+        <Route path="/register" element={<Layout><Register /></Layout>} />
+        <Route path="/login" element={<Layout><Login /></Layout>} />
+        <Route path="*" element={<TakDitemukan />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
-
-export default App

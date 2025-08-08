@@ -1,10 +1,9 @@
-module.exports = {
-  purge: [],
-  darkMode: false, // or 'media' or 'class'
+// tailwind.config.ts or tailwind.config.js
+import { createThemes } from 'tailwindcss/defaultTheme'
+
+export default {
+  content: ['./src/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {},
-  },
-  variants: {
     extend: {},
   },
   plugins: [],
