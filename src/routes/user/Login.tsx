@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../../backend/supabase";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [identifier, setIdentifier] = useState(""); // email or username
@@ -7,6 +8,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,39 +23,25 @@ export default function Login() {
     setLoading(true);
 
     let emailToUse = identifier;
-
     const isEmail = identifier.includes("@");
 
     if (!isEmail) {
-      // Step 1: get auth_id by username from public.user
-      const { data: userData, error: userError } = await supabase
-        .from("user")
-        .select("auth_id")
-        .eq("username", identifier)
-        .limit(1)
-        .maybeSingle();
+      const res = await fetch(`/api/get-email-by-username`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: identifier }),
+      });
 
-      if (userError || !userData?.auth_id) {
-        setError("Username tidak ditemukan.");
+      const data = await res.json();
+
+      if (!res.ok || !data.email) {
+        console.error("API error response:", data);
+        setError(data.error || "Username tidak ditemukan.");
         setLoading(false);
         return;
       }
 
-      // Step 2: get email by auth_id from auth.users
-      const { data: authData, error: authError } = await supabase
-        .from("auth.users")
-        .select("email")
-        .eq("id", userData.auth_id)
-        .limit(1)
-        .maybeSingle();
-
-      if (authError || !authData?.email) {
-        setError("Gagal mendapatkan email untuk username ini.");
-        setLoading(false);
-        return;
-      }
-
-      emailToUse = authData.email;
+      emailToUse = data.email;
     }
 
     // Step 3: login with email + password
@@ -68,10 +56,67 @@ export default function Login() {
       return;
     }
 
-    setMessage("Login berhasil!");
-    setLoading(false);
+    // Step 4: get logged in user data
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData.user) {
+      setError("Gagal mengambil data pengguna.");
+      setLoading(false);
+      return;
+    }
 
-    // TODO: post-login logic like redirect
+    // Step 5: fetch numeric user_id from public.user using auth_id
+    const { data: userRecord, error: userRecordError } = await supabase
+      .from("user")
+      .select("user_id")
+      .eq("auth_id", userData.user.id)
+      .single();
+
+    if (userRecordError || !userRecord) {
+      setError("Gagal menemukan user record.");
+      setLoading(false);
+      return;
+    }
+
+    const numericUserId = userRecord.user_id;
+
+    // Step 6: check if user is suspended
+    const { data: activeSuspension, error: suspendError } = await supabase
+      .from("suspend_user")
+      .select("*")
+      .eq("user_id", numericUserId)
+      .eq("status", "aktif")
+      .limit(1)
+      .single();
+
+    if (suspendError && suspendError.code !== "PGRST116") { // ignore "no rows found" error
+      console.error("Failed to check suspension:", suspendError.message);
+      setLoading(false);
+      return;
+    } else if (activeSuspension) {
+      setError(
+        `Akun anda sedang disuspend sampai ${new Date(
+          activeSuspension.lepas_suspend
+        ).toLocaleString()}.\nAlasan: ${activeSuspension.alasan}`
+      );
+      setLoading(false);
+      return;
+    }
+
+    // Step 7: fetch username from public.user table
+    const { data: profileData, error: profileError } = await supabase
+      .from("user")
+      .select("username")
+      .eq("user_id", numericUserId)
+      .single();
+
+    if (!profileError && profileData) {
+      userData.user.user_metadata = {
+        ...userData.user.user_metadata,
+        username: profileData.username,
+      };
+    }
+
+    navigate("/"); // redirect to homepage/dashboard
   };
 
   return (

@@ -1,0 +1,55 @@
+// src/App.tsx
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { UserSessionProvider } from './backend/UserSessionContext';
+
+import Layout from './components/fixed/Layout';
+
+import Beranda from './routes/Beranda';
+import TentangWebsite from './routes/about/TentangWebsite';
+import Timeline from './routes/about/Timeline';
+import Kamus from './routes/kontribusi/Kamus';
+import Cerita from './routes/kontribusi/Cerita';
+import MaknaKata from './routes/kontribusi/MaknaKata';
+
+import Artikel from './routes/artikel/Artikel';
+import ArtikelDetail from './routes/artikel/ArtikelDetail';
+import BuatArtikel from './routes/artikel/BuatArtikel';
+
+import Register from './routes/user/Register';
+import Login from './routes/user/Login';
+
+import Profile from './routes/user/profile/Profile';
+import Dashboard from './routes/user/dashboard/Dashboard';
+import KontribusiView from './routes/user/kontribusiview/KontribusiView';
+
+import TakDitemukan from './routes/TakDitemukan';
+
+export default function App() {
+  return (
+    <UserSessionProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout><Beranda /></Layout>} />
+          <Route path="/tentang-website" element={<Layout><TentangWebsite /></Layout>} />
+          <Route path="/timeline" element={<Layout><Timeline /></Layout>} />
+
+          <Route path="/kamus" element={<Layout><Kamus /></Layout>} />
+          <Route path="/cerita" element={<Layout><Cerita /></Layout>} />
+          <Route path="/makna-kata" element={<Layout><MaknaKata /></Layout>} />
+
+          <Route path="/artikel" element={<Layout><Artikel /></Layout>} />
+          <Route path="/artikel/buat" element={<BuatArtikel />} />
+          <Route path="/artikel/:slug" element={<Layout><ArtikelDetail /></Layout>} />
+
+          <Route path="/register" element={<Layout><Register /></Layout>} />
+          <Route path="/login" element={<Layout><Login /></Layout>} />
+
+          <Route path="/profile/:tab?" element={<Profile />} />
+          <Route path="/dashboard/:tab?" element={<Dashboard />} />
+          <Route path="/lihat-kontribusi/:tab?" element={<KontribusiView />} />
+          <Route path="*" element={<TakDitemukan />} />
+        </Routes>
+      </BrowserRouter>
+    </UserSessionProvider>
+  );
+}

@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css'; // Make sure this file exists for Tailwind
 import '@fontsource/inter/800.css';
+import "react-easy-crop/react-easy-crop.css";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

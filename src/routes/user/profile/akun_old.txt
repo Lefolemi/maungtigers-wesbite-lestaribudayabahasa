@@ -1,0 +1,189 @@
+import { useState, useCallback } from "react";
+import Cropper, { type Area } from "react-easy-crop";
+
+export default function Akun() {
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [image, setImage] = useState<string | null>(null);
+  const [tempImage, setTempImage] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+
+  const onCropComplete = useCallback((_cropped: Area, pixels: Area) => {
+    setCroppedAreaPixels(pixels);
+  }, []);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setTempImage(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const getCroppedImage = useCallback(async () => {
+    if (!tempImage || !croppedAreaPixels) return null;
+
+    const img = new Image();
+    img.src = tempImage;
+    await new Promise((resolve) => (img.onload = resolve));
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+
+    const targetSize = 128;
+    canvas.width = targetSize;
+    canvas.height = targetSize;
+
+    ctx.drawImage(
+      img,
+      croppedAreaPixels.x,
+      croppedAreaPixels.y,
+      croppedAreaPixels.width,
+      croppedAreaPixels.height,
+      0,
+      0,
+      targetSize,
+      targetSize
+    );
+
+    return canvas.toDataURL("image/png");
+  }, [tempImage, croppedAreaPixels]);
+
+  const handleConfirm = async () => {
+    const cropped = await getCroppedImage();
+    if (cropped) {
+      setImage(cropped);
+      setTempImage(null); // hide cropper
+    }
+  };
+
+  const handleCancel = () => {
+    setTempImage(null);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Nama lengkap */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Nama lengkap</label>
+        <input
+          type="text"
+          className="w-full px-3 py-2 border rounded"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </div>
+
+      {/* Username */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Username</label>
+        <input
+          type="text"
+          className="w-full px-3 py-2 border rounded"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+      </div>
+
+      {/* Gambar profile */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Gambar profile</label>
+        <div className="flex items-center gap-4">
+          {image ? (
+            <img
+              src={image}
+              alt="Profile"
+              className="w-32 h-32 rounded-full border object-cover"
+            />
+          ) : (
+            <div className="w-32 h-32 rounded-full border flex items-center justify-center text-gray-400">
+              No Image
+            </div>
+          )}
+
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            id="profile-upload"
+            onChange={handleFileChange}
+          />
+          <label
+            htmlFor="profile-upload"
+            className="px-3 py-2 border rounded bg-gray-100 hover:bg-gray-200 cursor-pointer"
+          >
+            Pilih gambar
+          </label>
+        </div>
+      </div>
+
+      {/* Inline cropper */}
+      {tempImage && (
+        <div className="mt-4">
+          <div className="relative w-full min-h-[300px] sm:h-[400px] bg-gray-200 overflow-hidden">
+            <Cropper
+              image={tempImage}
+              crop={crop}
+              zoom={zoom}
+              aspect={1}
+              cropShape="round"       // 👈 built-in circular mask
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onCropComplete={onCropComplete}
+            />
+          </div>
+
+          <div className="flex gap-2 mt-2">
+            <button
+              onClick={handleConfirm}
+              className="px-4 py-2 rounded bg-green-600 text-white"
+            >
+              Confirm
+            </button>
+            <button
+              onClick={handleCancel}
+              className="px-4 py-2 rounded bg-gray-500 text-white"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Email */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Email</label>
+        <div className="flex gap-2">
+          <input
+            type="email"
+            disabled
+            value="user@example.com"
+            className="w-full px-3 py-2 border rounded bg-gray-100"
+          />
+          <button className="px-3 py-2 border rounded bg-gray-100 hover:bg-gray-200">
+            Ubah
+          </button>
+        </div>
+      </div>
+
+      {/* Password */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Password</label>
+        <div className="flex gap-2">
+          <input
+            type="password"
+            disabled
+            value="********"
+            className="w-full px-3 py-2 border rounded bg-gray-100"
+          />
+          <button className="px-3 py-2 border rounded bg-gray-100 hover:bg-gray-200">
+            Ubah
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

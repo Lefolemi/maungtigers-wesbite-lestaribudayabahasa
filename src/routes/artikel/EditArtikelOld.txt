@@ -1,0 +1,217 @@
+// src/routes/artikel/EditArtikel.tsx
+import { useParams, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "../../backend/supabase";
+import { useUserSession } from "../../backend/context/UserSessionContext";
+import ArtikelForm from "../../components/artikel/ArtikelForm";
+
+export default function EditArtikel() {
+  const { slug } = useParams<{ slug: string }>();
+  const { user } = useUserSession();
+
+  const [article, setArticle] = useState<any | null>(null);
+  const [title, setTitle] = useState("");
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [content, setContent] = useState<any>(null);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [unauthorized, setUnauthorized] = useState(false);
+  const [warning, setWarning] = useState<string | null>(null);
+
+  // Fetch article and tags
+  useEffect(() => {
+    if (!slug || !user) return;
+
+    const fetchArtikel = async () => {
+      setLoading(true);
+
+      // Fetch article
+      const { data: artikel, error: artikelError } = await supabase
+        .from("artikel")
+        .select("artikel_id, user_id, judul, konten, slug, thumbnail, status")
+        .eq("slug", slug)
+        .maybeSingle();
+
+      if (artikelError || !artikel) {
+        setUnauthorized(true);
+        setLoading(false);
+        return;
+      }
+
+      if (artikel.user_id !== user.user_id) {
+        setUnauthorized(true);
+        setLoading(false);
+        return;
+      }
+
+      setArticle(artikel);
+      setTitle(artikel.judul);
+      setContent(artikel.konten);
+      setThumbnailPreview(artikel.thumbnail || null);
+
+      const { data: tagRelations } = await supabase
+        .from("artikel_tag")
+        .select("tag_id(nama_tag)") // fetch related tag object
+        .eq("artikel_id", artikel.artikel_id);
+
+      if (tagRelations) {
+        const tagNames = tagRelations
+          .map((tr) => {
+            const tagObj = Array.isArray(tr.tag_id) ? tr.tag_id[0] : tr.tag_id;
+            return tagObj?.nama_tag;
+          })
+          .filter(Boolean) as string[];
+
+        setTags(tagNames);
+      }
+
+      setLoading(false);
+    };
+
+    fetchArtikel();
+  }, [slug, user]);
+
+  // Handle thumbnail change
+  const handleThumbnailChange = (file: File | null) => {
+    setThumbnailFile(file);
+    if (!file) {
+      setThumbnailPreview(null);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setThumbnailPreview(url);
+    const reader = new FileReader();
+    reader.onloadend = () => setThumbnailPreview(reader.result as string);
+    reader.readAsDataURL(file);
+    return () => URL.revokeObjectURL(url);
+  };
+
+  // Update logic
+  const saveChanges = async (mode: "draft" | "review" | "resubmit") => {
+    if (!title.trim()) return setWarning("Title cannot be empty");
+    if (!content) return setWarning("Content cannot be empty");
+
+    setWarning("Uploading images...");
+    let thumbnailUrl = thumbnailPreview;
+
+    if (thumbnailFile) {
+      // TODO: replace with actual upload function
+      // thumbnailUrl = await uploadGambar(thumbnailFile, "thumbnail");
+    }
+
+    try {
+      // Update artikel
+      await supabase
+        .from("artikel")
+        .update({
+          judul: title,
+          konten: content,
+          thumbnail: thumbnailUrl,
+          status:
+            mode === "draft"
+              ? "draft"
+              : mode === "review"
+              ? "direview"
+              : "direview", // resubmit goes back to direview
+        })
+        .eq("artikel_id", article.artikel_id);
+
+      // Update tags
+      const { data: existingTags } = await supabase
+        .from("tag")
+        .select("tag_id, nama_tag")
+        .in("nama_tag", tags);
+
+      const existingMap = new Map(
+        (existingTags || []).map((t) => [t.nama_tag, t.tag_id])
+      );
+
+      const newTags = tags.filter((t) => !existingMap.has(t));
+      if (newTags.length > 0) {
+        const { data: insertedTags } = await supabase
+          .from("tag")
+          .insert(newTags.map((t) => ({ nama_tag: t })))
+          .select("tag_id, nama_tag");
+
+        if (insertedTags) {
+          insertedTags.forEach((t) => existingMap.set(t.nama_tag, t.tag_id));
+        }
+      }
+
+      await supabase
+        .from("artikel_tag")
+        .delete()
+        .eq("artikel_id", article.artikel_id);
+
+      const artikelTagRows = tags.map((t) => ({
+        artikel_id: article.artikel_id,
+        tag_id: existingMap.get(t)!,
+      }));
+
+      if (artikelTagRows.length > 0) {
+        await supabase.from("artikel_tag").insert(artikelTagRows);
+      }
+
+      setWarning("✅ Article updated successfully!");
+    } catch (err: any) {
+      setWarning("❌ Failed to update article: " + (err.message ?? err));
+    }
+  };
+
+  if (loading) return <p>Loading article...</p>;
+  if (unauthorized) return <Navigate to="/artikel" replace />;
+  if (!article) return <p>No article found.</p>;
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold mb-4">Edit Article</h1>
+      {warning && (
+        <div className="p-3 rounded bg-yellow-100 border border-yellow-400 text-yellow-800 mb-4">
+          {warning}
+        </div>
+      )}
+      <ArtikelForm
+        title={title}
+        setTitle={setTitle}
+        slug={article.slug}
+        thumbnailPreview={thumbnailPreview}
+        onThumbnailChange={handleThumbnailChange}
+        tags={tags}
+        setTags={setTags}
+        tagInput={tagInput}
+        setTagInput={setTagInput}
+        content={content}
+        onContentChange={setContent}
+      />
+      <div className="mt-4 space-x-2">
+      {article.status === "draft" && (
+        <>
+          <button
+            onClick={() => saveChanges("draft")}
+            className="px-4 py-2 bg-gray-600 text-white rounded"
+          >
+            Save Draft
+          </button>
+          <button
+            onClick={() => saveChanges("review")}
+            className="px-4 py-2 bg-green-600 text-white rounded"
+          >
+            Submit for Review
+          </button>
+        </>
+      )}
+
+      {(article.status === "direview" || article.status === "terbit") && (
+        <button
+          onClick={() => saveChanges("resubmit")}
+          className="px-4 py-2 bg-blue-600 text-white rounded"
+        >
+          Resubmit for Review
+        </button>
+      )}
+    </div>
+    </div>
+  );
+}

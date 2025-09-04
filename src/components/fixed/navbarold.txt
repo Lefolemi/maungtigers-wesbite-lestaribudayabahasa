@@ -1,0 +1,124 @@
+import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useUserSession } from "../../backend/UserSessionContext";
+
+type NavItem = {
+  label: string;
+  path?: string;
+  children?: { label: string; path: string }[];
+};
+
+const navItems: NavItem[] = [
+  { label: 'Beranda', path: '/' },
+  {
+    label: 'Tentang',
+    children: [
+      { label: 'Tentang Website', path: '/tentang-website' },
+      { label: 'Timeline', path: '/timeline' },
+    ],
+  },
+  {
+    label: 'Kontribusi',
+    children: [
+      { label: 'Kamus', path: '/kamus' },
+      { label: 'Cerita', path: '/cerita' },
+      { label: 'Makna Kata', path: '/makna-kata' },
+    ],
+  },
+  { label: 'Artikel', path: '/artikel' },
+];
+
+export default function Navbar() {
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const { user, logout } = useUserSession();
+
+  const menuItemClass = "block px-4 py-2 hover:bg-gray-100 w-full text-left";
+
+  return (
+    <nav className="bg-blue-600 text-white px-4 py-3 shadow-md">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        {/* Left: nav links */}
+        <div className="flex items-center space-x-6">
+          {navItems.map((item) =>
+            item.children ? (
+              <div
+                key={item.label}
+                className="relative"
+                onMouseEnter={() => setOpenDropdown(item.label)}
+                onMouseLeave={() => setOpenDropdown(null)}
+              >
+                <button className="hover:underline">{item.label}</button>
+                {openDropdown === item.label && (
+                  <div className="absolute left-0 mt-2 bg-white text-black rounded shadow-md z-10 min-w-max">
+                    {item.children.map((child) => (
+                      <Link
+                        key={child.path}
+                        to={child.path}
+                        className={menuItemClass}
+                      >
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link key={item.path} to={item.path!} className="hover:underline">
+                {item.label}
+              </Link>
+            )
+          )}
+        </div>
+
+        {/* Right: Auth */}
+        <div className="space-x-4 relative">
+        {user ? (
+          <div
+            className="relative"
+            onMouseEnter={() => setOpenDropdown("auth")}
+            onMouseLeave={() => setOpenDropdown(null)}
+          >
+            <button className="hover:underline">
+              {user?.username || user?.email}
+            </button>
+            {openDropdown === "auth" && (
+              <div className="absolute right-0 mt-2 bg-white text-black rounded shadow-md z-10 min-w-max">
+                <Link to="/profile" className={menuItemClass}>
+                  Profile
+                </Link>
+                <Link to="/dashboard" className={menuItemClass}>
+                  Dashboard
+                </Link>
+                <Link to="/kontribusi" className={menuItemClass}>
+                  Kontribusi
+                </Link>
+                <Link to="/pengaturan-website" className={menuItemClass}>
+                  Pengaturan Website
+                </Link>
+                <button
+                  onClick={logout}
+                  className={
+                    menuItemClass +
+                    " cursor-pointer appearance-none bg-transparent border-0"
+                  }
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            <Link to="/register" className="hover:underline">
+              Register
+            </Link>
+            <Link to="/login" className="hover:underline">
+              Login
+            </Link>
+          </>
+        )}
+        </div>
+      </div>
+    </nav>
+  );
+}
