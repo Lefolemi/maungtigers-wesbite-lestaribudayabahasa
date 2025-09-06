@@ -18,7 +18,16 @@ import BuatKamus from "./routes/kamus/BuatKamus";
 import EditKamus from "./routes/kamus/EditKamus";
 
 import Cerita from "./routes/cerita/Cerita";
+import CeritaDetail from "./routes/cerita/CeritaDetail";
+import BuatCerita from "./routes/cerita/BuatCerita";
+import CeritaPreview from "./routes/cerita/CeritaPreview";
+import EditCerita from "./routes/cerita/EditCerita";
+
 import MaknaKata from "./routes/makna_kata/MaknaKata";
+import MaknaKataDetail from "./routes/makna_kata/MaknaKataDetail";
+import BuatMakna from "./routes/makna_kata/BuatMakna";
+import EditMakna from "./routes/makna_kata/EditMakna";
+import MaknaKataPreview from "./routes/makna_kata/MaknaKataPreview";
 
 import Artikel from "./routes/artikel/Artikel";
 import ArtikelDetail from "./routes/artikel/ArtikelDetail";
@@ -40,6 +49,9 @@ import TestFetchArtikel from "./routes/artikel/TestFetchArtikel";
 // ⬅️ new pages
 import AdminPage from "./routes/mod/admin/Admin";
 import ModeratorPage from "./routes/mod/moderator/Moderator";
+import ReviewArtikelLihat from "./routes/mod/moderator/lihatreview/ReviewArtikelLihat";
+import ReviewCeritaLihat from "./routes/mod/moderator/lihatreview/ReviewCeritaLihat";
+import ReviewMaknaKataLihat from "./routes/mod/moderator/lihatreview/ReviewMaknaKataLihat";
 
 const router = createBrowserRouter([
   {
@@ -53,8 +65,10 @@ const router = createBrowserRouter([
       { path: "/kamus", element: <Kamus /> },
 
       { path: "/cerita", element: <Cerita /> },
+      { path: "/cerita/:id", element: <CeritaDetail /> },
 
       { path: "/makna-kata", element: <MaknaKata /> },
+      { path: "/makna-kata/:id", element: <MaknaKataDetail /> },
 
       { path: "/artikel", element: <Artikel /> },
       { path: "/artikel/:slug", element: <ArtikelDetail /> },
@@ -81,6 +95,14 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+
+  { path: "/cerita/buat", element: <BuatCerita /> },
+  { path: "/cerita/edit/:id", element: <EditCerita /> },
+  { path: "/cerita/preview", element: <CeritaPreview /> },
+
+  { path: "/makna-kata/buat", element: <BuatMakna /> },
+  { path: "/makna-kata/edit/:id", element: <EditMakna /> },
+  { path: "/makna-kata/preview", element: <MaknaKataPreview /> },
 
   {
     path: "/artikel/buat",
@@ -122,6 +144,10 @@ const router = createBrowserRouter([
       </RoleRoute>
     ),
   },
+
+  { path: "/moderator-zone/review/lihat/artikel/:slug", element: <ReviewArtikelLihat /> },
+  { path: "/moderator-zone/review/lihat/cerita/:id", element: <ReviewCeritaLihat /> },
+  { path: "/moderator-zone/review/lihat/makna-kata/:id", element: <ReviewMaknaKataLihat /> },
 
   // Missing path
   { path: "*", element: <TakDitemukan /> },

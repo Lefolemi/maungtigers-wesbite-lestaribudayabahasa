@@ -7,7 +7,7 @@ import RoleRoute from "../../../backend/blocked/RoleRoute";
 import TakDitemukan from "../../TakDitemukan";
 
 // Import the actual tab components
-import ModeratorReview from "./ModeratorReview";
+import ModeratorReview from "./review/ModeratorReview";
 import ModeratorReport from "./ModeratorReport";
 import ModeratorPermission from "./ModeratorPermission";
 
