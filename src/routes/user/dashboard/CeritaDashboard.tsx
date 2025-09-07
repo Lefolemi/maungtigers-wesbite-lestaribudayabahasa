@@ -170,7 +170,7 @@ export default function CeritaDashboard() {
               outerRadius={80}
               label
             >
-              {statusData.map((entry, index) => (
+              {statusData.map((_entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>

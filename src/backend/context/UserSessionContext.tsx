@@ -69,7 +69,7 @@ export function UserSessionProvider({ children }: { children: ReactNode }) {
     loadUser();
 
     // Listen to auth state changes and reload user automatically
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((_event) => {
       loadUser();
     });
 

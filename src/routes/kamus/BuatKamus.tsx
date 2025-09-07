@@ -25,7 +25,7 @@ export default function BuatKamus() {
   const [bahasaId, setBahasaId] = useState<number | null>(null);
   const [bahasaList, setBahasaList] = useState<Bahasa[]>([]);
   const [rows, setRows] = useState<KamusRow[]>([]);
-  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [, setCsvFile] = useState<File | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [existingWords, setExistingWords] = useState<Set<string>>(new Set());

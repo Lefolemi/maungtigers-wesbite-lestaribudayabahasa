@@ -26,7 +26,6 @@ interface MaknaFormProps {
 
 function MaknaForm({
   selectedWord,
-  setSelectedWord,
   gambarPreview,
   onThumbnailChange,
   tags,
