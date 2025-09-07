@@ -5,7 +5,6 @@ import App from "./App.tsx";
 import "./index.css";
 import "@fontsource/inter/800.css";
 import "react-easy-crop/react-easy-crop.css";
-import WordPopup from "./components/makna-kata/WordPopup.tsx";
 
 // mount App as usual
 createRoot(document.getElementById("root")!).render(

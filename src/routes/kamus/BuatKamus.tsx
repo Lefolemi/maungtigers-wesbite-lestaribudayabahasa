@@ -2,6 +2,11 @@
 import { useState, useEffect } from "react";
 import { useUserSession } from "../../backend/context/UserSessionContext";
 import { supabase } from "../../backend/supabase";
+import NavbarBarebone from "../../components/ui/NavbarBarebone";
+import DropdownSelect from "../../components/ui/DropdownSelect";
+import FileUploadButton from "../../components/ui/FileUploadButton";
+import DataTable from "../../components/ui/DataTable";
+import { Trash2 } from "lucide-react";
 
 type KamusRow = {
   kata: string;
@@ -69,61 +74,69 @@ export default function BuatKamus() {
     loadUserKamus();
   }, [bahasaId, user]);
 
-  // CSV import with per-user uniqueness check and duplicate count warning
-const handleCsvChange = (file: File | null) => {
+  // CSV import
+  const handleCsvChange = (file: File | null) => {
     if (!file) return;
     setCsvFile(file);
-    setWarning(null); // reset previous warnings
-  
+    setWarning(null);
+
     const reader = new FileReader();
     reader.onload = () => {
       const text = reader.result as string;
       const lines = text.split(/\r?\n/).filter(Boolean);
       const newRows: KamusRow[] = [];
       let duplicateCount = 0;
-  
-      lines.forEach((line, index) => {
+
+      lines.forEach((line) => {
         const [kata, arti, contoh] = line.split(",");
         if (!kata || !arti || !contoh) return;
-  
+
         const kataLower = kata.trim().toLowerCase();
-  
-        // skip if already exists for this user or in new rows
-        if (existingWords.has(kataLower) || newRows.some((r) => r.kata === kataLower)) {
+
+        if (
+          existingWords.has(kataLower) ||
+          newRows.some((r) => r.kata === kataLower)
+        ) {
           duplicateCount++;
           return;
         }
-  
+
         newRows.push({
           kata: kataLower,
           arti: arti.trim().toLowerCase(),
           contoh: contoh.trim().toLowerCase(),
         });
       });
-  
+
       setRows(newRows);
-  
-      // show warning if any duplicates were skipped
+
       if (duplicateCount > 0) {
-        setWarning(`⚠ ${duplicateCount} kata di CSV sudah ada sebelumnya. Edit kata yang sama melalui Edit Kamus.`);
+        setWarning(
+          `⚠ ${duplicateCount} kata di CSV sudah ada sebelumnya. Edit kata yang sama melalui Edit Kamus.`
+        );
       }
-  
-      // reset file input so the same CSV can be uploaded again
-      const input = document.querySelector<HTMLInputElement>('input[type="file"]');
-      if (input) input.value = '';
+
+      const input =
+        document.querySelector<HTMLInputElement>('input[type="file"]');
+      if (input) input.value = "";
     };
     reader.readAsText(file);
-  };  
+  };
 
-  const handleAddRow = () => setRows([...rows, { kata: "", arti: "", contoh: "" }]);
-  const handleRemoveRow = (index: number) => setRows(rows.filter((_, i) => i !== index));
-  const handleChangeRow = (index: number, field: keyof KamusRow, value: string) => {
+  const handleAddRow = () =>
+    setRows([...rows, { kata: "", arti: "", contoh: "" }]);
+  const handleRemoveRow = (index: number) =>
+    setRows(rows.filter((_, i) => i !== index));
+  const handleChangeRow = (
+    index: number,
+    field: keyof KamusRow,
+    value: string
+  ) => {
     const newRows = [...rows];
     newRows[index][field] = value.toLowerCase();
     setRows(newRows);
   };
 
-  // Submit with per-user uniqueness check
   const handleSubmit = async () => {
     if (!user) {
       setWarning("User belum login!");
@@ -138,7 +151,6 @@ const handleCsvChange = (file: File | null) => {
       return;
     }
 
-    // Ensure no duplicates in table or existing words
     const kataSet = new Set<string>();
     for (const row of rows) {
       if (existingWords.has(row.kata)) {
@@ -171,7 +183,6 @@ const handleCsvChange = (file: File | null) => {
       setRows([]);
       setCsvFile(null);
 
-      // update existingWords so user can continue adding new words
       const updatedWords = new Set(existingWords);
       insertRows.forEach((r) => updatedWords.add(r.kata));
       setExistingWords(updatedWords);
@@ -184,105 +195,103 @@ const handleCsvChange = (file: File | null) => {
   };
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Buat Kamus</h1>
+    <div className="min-h-screen bg-primer">
+      {/* Navbar */}
+      <NavbarBarebone title="Buat Kamus" backTo="/" />
 
-      {/* Language Dropdown */}
-        <select
-        className="border p-2 rounded"
-        value={bahasaId ?? ""}
-        onChange={(e) => setBahasaId(Number(e.target.value))}
-        >
-        <option value="" disabled>
-            Pilih bahasa
-        </option>
-        {bahasaList.map((b) => (
-            <option key={b.bahasa_id} value={b.bahasa_id}>
-            {b.nama_bahasa}
-            </option>
-        ))}
-        </select>
+      {/* Content */}
+      <div className="max-w-4xl mx-auto p-6 bg-white rounded-figma-lg shadow-lg space-y-6 mt-6">
+        {/* Language Dropdown + CSV Upload inline */}
+        <div className="flex justify-between items-center">
+          {/* Language Dropdown */}
+          <div className="w-64 relative">
+            <DropdownSelect
+              value={bahasaId}
+              onChange={setBahasaId}
+              options={bahasaList.map((b) => ({
+                value: b.bahasa_id,
+                label: b.nama_bahasa,
+              }))}
+              placeholder="Pilih bahasa"
+            />
+          </div>
 
-        {/* CSV Upload */}
-        <div>
-        <input
-            type="file"
+          {/* CSV Upload */}
+          <FileUploadButton
+            id="csvUpload"
+            label="Import CSV"
             accept=".csv,text/csv"
-            onChange={(e) => handleCsvChange(e.target.files?.[0] || null)}
-            disabled={!bahasaId} // disabled if no bahasa selected
-        />
-        <p className="text-sm text-gray-500">CSV harus memiliki kolom: kata, arti, contoh</p>
+            disabled={!bahasaId}
+            onChange={handleCsvChange}
+          />
         </div>
 
-      {/* Table */}
-      <table className="table-auto border-collapse border w-full">
-        <thead>
-          <tr>
-            <th className="border px-2 py-1">Kata</th>
-            <th className="border px-2 py-1">Arti</th>
-            <th className="border px-2 py-1">Contoh</th>
-            <th className="border px-2 py-1">#</th>
-          </tr>
-        </thead>
-        <tbody>
+        <p className="text-sm text-gray-500 mt-1">
+          CSV harus memiliki kolom: kata, arti, contoh
+        </p>
+
+        {/* Table */}
+        <DataTable headers={["Kata", "Arti", "Contoh", "Hapus"]}>
           {rows.map((row, i) => (
-            <tr key={i}>
-              <td className="border px-2 py-1">
+            <tr key={i} className="border-t border-sekunder">
+              <td className="px-2 py-1">
                 <input
                   type="text"
                   value={row.kata}
                   onChange={(e) => handleChangeRow(i, "kata", e.target.value)}
-                  className="w-full border rounded px-1 py-0.5"
+                  className="w-full border rounded-figma-md px-2 py-1"
                 />
               </td>
-              <td className="border px-2 py-1">
+              <td className="px-2 py-1">
                 <input
                   type="text"
                   value={row.arti}
                   onChange={(e) => handleChangeRow(i, "arti", e.target.value)}
-                  className="w-full border rounded px-1 py-0.5"
+                  className="w-full border rounded-figma-md px-2 py-1"
                 />
               </td>
-              <td className="border px-2 py-1">
+              <td className="px-2 py-1">
                 <input
                   type="text"
                   value={row.contoh}
                   onChange={(e) => handleChangeRow(i, "contoh", e.target.value)}
-                  className="w-full border rounded px-1 py-0.5"
+                  className="w-full border rounded-figma-md px-2 py-1"
                 />
               </td>
-              <td className="border px-2 py-1">
-                <button
-                  onClick={() => handleRemoveRow(i)}
-                  className="px-2 py-1 bg-red-500 text-white rounded"
-                >
-                  Hapus
-                </button>
+              <td className="px-2 py-1">
+                <div className="flex justify-center items-center h-full">
+                  <span
+                    onClick={() => handleRemoveRow(i)}
+                    className="cursor-pointer text-black hover:text-red-700 transition-colors"
+                  >
+                    <Trash2 size={20} />
+                  </span>
+                </div>
               </td>
             </tr>
           ))}
-        </tbody>
-      </table>
+        </DataTable>
 
-      {/* Table Buttons */}
-        <div className="flex gap-2 mt-2">
-        <button
+        {/* Table Buttons */}
+        <div className="flex gap-2 mt-4">
+          <button
             onClick={handleAddRow}
-            className="px-3 py-1 bg-gray-200 rounded"
-            disabled={!bahasaId} // disabled if no bahasa selected
-        >
+            className="px-4 py-2 bg-sekunder text-white rounded-figma-md hover:bg-tersier transition"
+            disabled={!bahasaId}
+          >
             Tambah Baris
-        </button>
-        <button
+          </button>
+          <button
             onClick={handleSubmit}
-            className="px-3 py-1 bg-green-600 text-white rounded"
-            disabled={submitting || !bahasaId} // still disabled if submitting
-        >
-            Submit for Review
-        </button>
+            className="px-4 py-2 bg-tersier text-white rounded-figma-md hover:bg-sekunder transition"
+            disabled={submitting || !bahasaId}
+          >
+            Kirim untuk review
+          </button>
         </div>
 
-      {warning && <p className="text-sm text-red-600">{warning}</p>}
+        {warning && <p className="text-sm text-red-600">{warning}</p>}
+      </div>
     </div>
   );
 }

@@ -56,7 +56,6 @@ export default function GantiEmail() {
 
   return (
     <div className="max-w-md mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Ganti Email</h1>
       <form onSubmit={handleChangeEmail}>
         {/* Current Email */}
         <div className="mb-4">
@@ -67,7 +66,7 @@ export default function GantiEmail() {
             type="email"
             value={user?.email ?? ""}
             disabled
-            className="w-full px-3 py-2 border rounded bg-gray-100"
+            className="w-full px-3 py-2 border rounded-figma-md bg-gray-100"
           />
         </div>
 
@@ -79,7 +78,7 @@ export default function GantiEmail() {
             placeholder="contoh: user123@gmail.com"
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border rounded-figma-md"
           />
         </div>
 
@@ -93,7 +92,7 @@ export default function GantiEmail() {
             placeholder="Masukkan password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border rounded-figma-md"
           />
         </div>
 
@@ -101,7 +100,7 @@ export default function GantiEmail() {
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+          className="px-4 py-2 bg-tersier text-white rounded-figma-md hover:bg-red-800 disabled:opacity-50"
         >
           {loading ? "Mengganti..." : "Ganti Email"}
         </button>

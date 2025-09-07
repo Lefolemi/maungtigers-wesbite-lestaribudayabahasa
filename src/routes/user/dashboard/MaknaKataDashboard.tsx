@@ -1,7 +1,7 @@
-// src/routes/dashboard/MaknaKataDashboard.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../../backend/supabase";
 import { useUserSession } from "../../../backend/context/UserSessionContext";
+import DropdownSelect from "../../../components/ui/DropdownSelect";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell
@@ -23,7 +23,6 @@ export default function MaknaKataDashboard() {
 
   const [bahasaList, setBahasaList] = useState<Bahasa[]>([]);
   const [selectedBahasaId, setSelectedBahasaId] = useState<number | "all">("all");
-
   const [timeFilter, setTimeFilter] = useState<"7" | "30" | "365" | "all">("all");
 
   const [total, setTotal] = useState(0);
@@ -37,9 +36,7 @@ export default function MaknaKataDashboard() {
         .select("bahasa_id, nama_bahasa")
         .order("nama_bahasa");
 
-      if (!error && data) {
-        setBahasaList(data as Bahasa[]);
-      }
+      if (!error && data) setBahasaList(data as Bahasa[]);
     }
     loadLanguages();
   }, []);
@@ -55,24 +52,18 @@ export default function MaknaKataDashboard() {
         .select("makna_id, bahasa_id, status, tanggal_dibuat")
         .eq("user_id", user.user_id);
 
-      // filter bahasa
-      if (selectedBahasaId !== "all") {
-        query = query.eq("bahasa_id", selectedBahasaId);
-      }
+      if (selectedBahasaId !== "all") query = query.eq("bahasa_id", selectedBahasaId);
 
-      // filter waktu
       if (timeFilter !== "all") {
         const now = new Date();
         let since = new Date();
         if (timeFilter === "7") since.setDate(now.getDate() - 7);
         if (timeFilter === "30") since.setDate(now.getDate() - 30);
         if (timeFilter === "365") since.setFullYear(now.getFullYear() - 1);
-
         query = query.gte("tanggal_dibuat", since.toISOString());
       }
 
       const { data, error } = await query;
-
       if (error) {
         console.error(error);
         setLoading(false);
@@ -81,37 +72,22 @@ export default function MaknaKataDashboard() {
 
       const makna = data || [];
 
-      // --- Summary ---
       setTotal(makna.length);
 
-      // --- Group by date ---
       const byDate: Record<string, LineData> = {};
-      makna.forEach((item) => {
+      makna.forEach(item => {
         const d = new Date(item.tanggal_dibuat);
         const key = d.toISOString().split("T")[0];
-        if (!byDate[key]) {
-          byDate[key] = { date: key, total: 0 };
-        }
+        if (!byDate[key]) byDate[key] = { date: key, total: 0 };
         byDate[key].total += 1;
       });
+      setLineData(Object.values(byDate).sort((a, b) => (a.date > b.date ? 1 : -1)));
 
-      const lineArr = Object.values(byDate).sort((a, b) =>
-        a.date > b.date ? 1 : -1
-      );
-      setLineData(lineArr);
-
-      // --- Status Pie (draft, direview, terbit) ---
       const byStatus: Record<string, number> = {};
-      makna.forEach((item) => {
+      makna.forEach(item => {
         byStatus[item.status] = (byStatus[item.status] || 0) + 1;
       });
-
-      setStatusData(
-        Object.entries(byStatus).map(([status, value]) => ({
-          name: status,
-          value,
-        }))
-      );
+      setStatusData(Object.entries(byStatus).map(([status, value]) => ({ name: status, value })));
 
       setLoading(false);
     };
@@ -123,37 +99,40 @@ export default function MaknaKataDashboard() {
 
   const COLORS = ["#8884d8", "#82ca9d", "#ffc658"];
 
+  const bahasaOptions = [
+    { value: "all", label: "🌐 Semua Bahasa" },
+    ...bahasaList.map(b => ({ value: b.bahasa_id, label: b.nama_bahasa })),
+  ];
+
+  const timeOptions = [
+    { value: "7", label: "7 Hari Terakhir" },
+    { value: "30", label: "30 Hari Terakhir" },
+    { value: "365", label: "1 Tahun Terakhir" },
+    { value: "all", label: "Semua Waktu" },
+  ];
+
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold mb-4">🔤 Dashboard Makna Kata</h1>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-4">
-        <select
-          className="border p-2 rounded"
-          value={selectedBahasaId}
-          onChange={(e) =>
-            setSelectedBahasaId(e.target.value === "all" ? "all" : Number(e.target.value))
-          }
-        >
-          <option value="all">🌐 Semua Bahasa</option>
-          {bahasaList.map((b) => (
-            <option key={b.bahasa_id} value={b.bahasa_id}>
-              {b.nama_bahasa}
-            </option>
-          ))}
-        </select>
-
-        <select
-          className="border p-2 rounded"
-          value={timeFilter}
-          onChange={(e) => setTimeFilter(e.target.value as any)}
-        >
-          <option value="7">7 Hari Terakhir</option>
-          <option value="30">30 Hari Terakhir</option>
-          <option value="365">1 Tahun Terakhir</option>
-          <option value="all">Semua Waktu</option>
-        </select>
+      <div className="flex flex-wrap gap-4 mb-4 w-full md:w-auto">
+        <div className="w-48">
+          <DropdownSelect
+            value={selectedBahasaId}
+            onChange={setSelectedBahasaId}
+            options={bahasaOptions}
+            placeholder="Pilih Bahasa"
+          />
+        </div>
+        <div className="w-48">
+          <DropdownSelect
+            value={timeFilter}
+            onChange={setTimeFilter}
+            options={timeOptions}
+            placeholder="Pilih Rentang Waktu"
+          />
+        </div>
       </div>
 
       {/* Summary */}

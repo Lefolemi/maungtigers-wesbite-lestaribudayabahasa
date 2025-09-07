@@ -1,4 +1,5 @@
 // src/components/article/ArtikelForm.tsx
+import { type ReactNode } from "react";
 import ArticleEditor from "./ArticleEditor";
 
 interface ArtikelFormProps {
@@ -11,9 +12,10 @@ interface ArtikelFormProps {
   setTags: (tags: string[]) => void;
   tagInput: string;
   setTagInput: (input: string) => void;
-  content: any;
-  onContentChange: (content: any) => void;
+  content?: any; // optional for custom editor
+  onContentChange?: (content: any) => void; // optional
   warning?: string | null;
+  children?: ReactNode; // ✅ support children for custom editor
 }
 
 export default function ArtikelForm({
@@ -29,6 +31,7 @@ export default function ArtikelForm({
   content,
   onContentChange,
   warning,
+  children,
 }: ArtikelFormProps) {
   return (
     <div className="p-8 space-y-6">
@@ -41,7 +44,7 @@ export default function ArtikelForm({
       <input
         type="text"
         value={title}
-        placeholder="Enter your article title"
+        placeholder="Masukan judul artikel..."
         onChange={(e) => setTitle(e.target.value)}
         className="w-full border rounded px-3 py-2 text-lg"
       />
@@ -96,8 +99,7 @@ export default function ArtikelForm({
           onKeyDown={(e) => {
             if (e.key === "Enter" && tagInput.trim()) {
               e.preventDefault();
-              if (!tags.includes(tagInput.trim()))
-                setTags([...tags, tagInput.trim()]);
+              if (!tags.includes(tagInput.trim())) setTags([...tags, tagInput.trim()]);
               setTagInput("");
             }
           }}
@@ -105,7 +107,8 @@ export default function ArtikelForm({
         />
       </div>
 
-      <ArticleEditor content={content} onChange={onContentChange} />
+      {/* Editor */}
+      {children ?? <ArticleEditor content={content} onChange={onContentChange!} />}
     </div>
   );
 }

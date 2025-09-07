@@ -2,16 +2,17 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../backend/supabase";
 import { Link } from "react-router-dom";
+import FilterSearchSort from "../../components/utilities/FilterSearchSort";
 
 interface Tag {
   tag_id: number;
   nama_tag: string;
 }
 
-interface Cerita {
+export interface Cerita {
   cerita_id: number;
   judul: string;
-  user_id: string;
+  user_id: number;
   author_nama: string;
   gambar?: string | null;
   informasi?: any;
@@ -24,6 +25,15 @@ interface Cerita {
 export default function Cerita() {
   const [ceritas, setCeritas] = useState<Cerita[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Search/filter/sort state
+  const [searchWord, setSearchWord] = useState("");
+  const [filterTags, setFilterTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [sortBy, setSortBy] = useState<"date" | "word">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  const [filteredCeritas, setFilteredCeritas] = useState<Cerita[]>([]);
 
   useEffect(() => {
     const fetchCeritas = async () => {
@@ -53,7 +63,6 @@ export default function Cerita() {
         const mapped: Cerita[] = [];
 
         for (const c of data || []) {
-          // fetch tags per cerita
           const { data: tagsData } = await supabase
             .from("cerita_tag")
             .select(`tag:tag_id(nama_tag)`)
@@ -80,6 +89,7 @@ export default function Cerita() {
         }
 
         setCeritas(mapped);
+        setFilteredCeritas(mapped);
       }
 
       setLoading(false);
@@ -87,6 +97,39 @@ export default function Cerita() {
 
     fetchCeritas();
   }, []);
+
+  useEffect(() => {
+    let filtered = [...ceritas];
+
+    if (searchWord.trim()) {
+      const lower = searchWord.toLowerCase();
+      filtered = filtered.filter(
+        (c) =>
+          c.judul.toLowerCase().includes(lower) ||
+          c.tags?.some((t) => t.nama_tag.toLowerCase().includes(lower))
+      );
+    }
+
+    if (filterTags.length > 0) {
+      filtered = filtered.filter((c) =>
+        filterTags.every((ft) => c.tags?.some((t) => t.nama_tag === ft))
+      );
+    }
+
+    filtered.sort((a, b) => {
+      if (sortBy === "date") {
+        const dateA = new Date(a.tanggal_dibuat).getTime();
+        const dateB = new Date(b.tanggal_dibuat).getTime();
+        return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+      } else {
+        return sortOrder === "asc"
+          ? a.judul.localeCompare(b.judul)
+          : b.judul.localeCompare(a.judul);
+      }
+    });
+
+    setFilteredCeritas(filtered);
+  }, [searchWord, ceritas, filterTags, sortBy, sortOrder]);
 
   if (loading) return <p className="p-8">Loading...</p>;
   if (ceritas.length === 0) return <p className="p-8">Belum ada cerita terbit.</p>;
@@ -97,51 +140,79 @@ export default function Cerita() {
       .filter((b: any) => b.type === "paragraph")
       .map((b: any) => b.content?.map((c: any) => c.text).join("") ?? "")
       .join(" ")
-      .slice(0, 150);
+      .slice(0, 200);
   };
 
   return (
-    <div className="p-8 space-y-6">
-      <h1 className="text-3xl font-bold mb-6">Daftar Cerita</h1>
-      <div className="grid md:grid-cols-2 gap-6">
-        {ceritas.map((c) => (
-          <Link
-            key={c.cerita_id}
-            to={`/cerita/${c.cerita_id}`}
-            className="border rounded p-4 hover:shadow-lg transition-shadow flex flex-col"
-          >
-            {c.gambar && (
-              <img
-                src={c.gambar}
-                alt={c.judul}
-                className="w-full h-40 object-cover rounded mb-3"
-              />
-            )}
-            <p className="text-sm text-gray-500 mb-1">
-              Terakhir edit: {c.terakhir_edit || c.tanggal_dibuat} | Bahasa: {c.bahasa_nama}
-            </p>
-            <h2 className="font-semibold text-lg mb-2">{c.judul}</h2>
-            {(c.tags ?? []).length > 0 && (
-              <div className="flex gap-2 flex-wrap mb-2">
-                {(c.tags ?? []).map((t) => (
-                  <span
-                    key={t.tag_id}
-                    className="text-xs bg-gray-200 px-2 py-1 rounded"
-                  >
-                    {t.nama_tag}
-                  </span>
-                ))}
+    <div className="bg-white min-h-screen">
+      {/* Hero Section */}
+      <div className="relative h-40 bg-primer flex items-center justify-center text-center px-6">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-white drop-shadow-lg">
+          Eksplorasi Cerita
+        </h1>
+      </div>
+
+      <div className="p-8 space-y-6">
+        {/* Search / Filter / Sort */}
+        <FilterSearchSort
+          searchWord={searchWord}
+          setSearchWord={setSearchWord}
+          filterTags={filterTags}
+          setFilterTags={setFilterTags}
+          tagInput={tagInput}
+          setTagInput={setTagInput}
+          filterStatus=""
+          setFilterStatus={() => {}}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+          showStatusFilter={false}
+        />
+
+        {/* Cerita cards */}
+        <div className="space-y-6">
+          {filteredCeritas.map((c) => (
+            <Link
+              key={c.cerita_id}
+              to={`/cerita/${c.cerita_id}`}
+              className="flex flex-col md:flex-row bg-white border border-black rounded-lg shadow hover:shadow-lg transition overflow-hidden"
+            >
+              {c.gambar && (
+                <img
+                  src={c.gambar}
+                  alt={c.judul}
+                  className="w-full md:w-72 h-72 object-cover flex-shrink-0"
+                />
+              )}
+              <div className="p-6 flex flex-col justify-between flex-grow">
+                <h2 className="font-bold text-2xl mb-3">{c.judul}</h2>
+
+                {(c.tags ?? []).length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {(c.tags ?? []).map((t) => (
+                      <span
+                        key={t.tag_id}
+                        className="text-xs bg-gray-200 px-2 py-1 rounded"
+                      >
+                        {t.nama_tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {c.informasi?.content && (
+                  <p className="text-gray-700 mb-3 flex-grow">
+                    {parseInformasiSnippet(c.informasi)}
+                    {c.informasi.content.length > 200 ? "..." : ""}
+                  </p>
+                )}
+
+                <p className="text-sm text-gray-500">By {c.author_nama}</p>
               </div>
-            )}
-            {c.informasi?.content && (
-              <p className="text-gray-700 text-sm">
-                {parseInformasiSnippet(c.informasi)}
-                {c.informasi.content.length > 150 ? "..." : ""}
-              </p>
-            )}
-            <p className="text-xs text-gray-400 mt-auto">By {c.author_nama}</p>
-          </Link>
-        ))}
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );

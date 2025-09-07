@@ -3,11 +3,94 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserSession } from "../../backend/context/UserSessionContext";
 import { useUserPerizinan } from "../../backend/context/UserPerizinanContext";
-import WordPopup, { type Word } from "../../components/makna-kata/WordPopup";
 import { usePrompt } from "../../components/utilities/usePrompt";
 import { useMaknaAutosaveManager } from "../../components/makna-kata/useMaknaAutosaveManager";
 import { simpanMaknaKata } from "../../components/makna-kata/simpanMaknaKata";
-import MaknaEditor from "../../components/makna-kata/MaknaEditor";
+import WordPopup, { type Word } from "../../components/makna-kata/WordPopup";
+import TipTapEditor from "../../components/ui/TipTapEditor";
+import NavbarBarebone from "../../components/ui/NavbarBarebone";
+
+interface MaknaFormProps {
+  selectedWord: Word | null;
+  setSelectedWord: (w: Word | null) => void;
+  gambarPreview: string | null;
+  onThumbnailChange: (file: File | null) => void;
+  tags: string[];
+  setTags: (tags: string[]) => void;
+  tagInput: string;
+  setTagInput: (input: string) => void;
+  children: any;
+  warning?: string | null;
+  openPopup: () => void;
+}
+
+function MaknaForm({
+  selectedWord,
+  setSelectedWord,
+  gambarPreview,
+  onThumbnailChange,
+  tags,
+  setTags,
+  tagInput,
+  setTagInput,
+  children,
+  warning,
+  openPopup,
+}: MaknaFormProps) {
+  return (
+    <div className="p-8 space-y-6 bg-white rounded-figma-lg shadow-lg">
+      {warning && (
+        <div className="p-3 rounded bg-yellow-100 border border-yellow-400 text-yellow-800">
+          {warning}
+        </div>
+      )}
+
+      <div>
+        <label className="block mb-2 font-medium">Kata</label>
+        <button
+          className="px-4 py-2 bg-sekunder text-white rounded"
+          onClick={openPopup}
+        >
+          {selectedWord ? selectedWord.kata : "Pilih Kata"}
+        </button>
+      </div>
+
+      <div>
+        <label className="block mb-2 font-medium">Thumbnail</label>
+        <input type="file" accept="image/*" onChange={e => onThumbnailChange(e.target.files?.[0] || null)} />
+        {gambarPreview && <img src={gambarPreview} className="mt-2 w-48 h-32 object-cover rounded border" />}
+      </div>
+
+      <div>
+        <label className="block mb-2 font-medium">Tags</label>
+        <div className="flex flex-wrap gap-2 mb-2">
+          {tags.map(tag => (
+            <span key={tag} className="flex items-center bg-gray-200 px-3 py-1 rounded-full text-sm">
+              {tag}
+              <button onClick={() => setTags(tags.filter(t => t !== tag))} className="ml-2 text-red-500 hover:text-red-700">×</button>
+            </span>
+          ))}
+        </div>
+        <input
+          type="text"
+          value={tagInput}
+          placeholder="Type a tag and press Enter"
+          onChange={e => setTagInput(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === "Enter" && tagInput.trim()) {
+              e.preventDefault();
+              if (!tags.includes(tagInput.trim())) setTags([...tags, tagInput.trim()]);
+              setTagInput("");
+            }
+          }}
+          className="w-full border rounded px-3 py-2"
+        />
+      </div>
+
+      {children}
+    </div>
+  );
+}
 
 export default function BuatMakna() {
   const navigate = useNavigate();
@@ -15,14 +98,13 @@ export default function BuatMakna() {
   const { permissions } = useUserPerizinan();
 
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
-  const [maknaId, setMaknaId] = useState<number | null>(null); // for editing existing makna
+  const [maknaId, setMaknaId] = useState<number | null>(null);
   const [informasi, setInformasi] = useState<any>(null);
   const [etimologi, setEtimologi] = useState<any>(null);
   const [gambar, setGambar] = useState<File | null>(null);
   const [gambarPreview, setGambarPreview] = useState<string | null>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
-
   const [saving, setSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [hasSavedDraft, setHasSavedDraft] = useState(false);
@@ -43,10 +125,7 @@ export default function BuatMakna() {
   const handleGambarChange = (file: File | null) => {
     setGambar(file);
     setIsDirty(true);
-    if (!file) {
-      setGambarPreview(null);
-      return;
-    }
+    if (!file) { setGambarPreview(null); return; }
     const url = URL.createObjectURL(file);
     setGambarPreview(url);
     const reader = new FileReader();
@@ -64,7 +143,6 @@ export default function BuatMakna() {
 
   const saveMakna = async (status: "draft" | "direview" | "terbit") => {
     if (!user || !validateFields() || !selectedWord) return;
-
     setSaving(true);
     setWarning("Menyimpan...");
 
@@ -90,10 +168,8 @@ export default function BuatMakna() {
         "✅ Makna kata diterbitkan!"
       );
 
-      // redirect after successful save
       navigate("/lihat-kontribusi/makna-kata");
 
-      // clear form if publishing
       if (status === "terbit") {
         setSelectedWord(null);
         setMaknaId(null);
@@ -119,57 +195,52 @@ export default function BuatMakna() {
   const canCreate = permissions["makna_kata"]?.boleh_buat === true;
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Buat Makna Kata</h1>
+    <div className="min-h-screen bg-primer">
+      <NavbarBarebone title="Buat Makna Kata" backTo="/" />
 
-      <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={() => setPopupOpen(true)}>
-        {selectedWord ? selectedWord.kata : "Pilih Kata"}
+      <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <MaknaForm
+    selectedWord={selectedWord}
+    setSelectedWord={setSelectedWord}
+    gambarPreview={gambarPreview}
+    onThumbnailChange={handleGambarChange}
+    tags={tags}
+    setTags={setTags}
+    tagInput={tagInput}
+    setTagInput={setTagInput}
+    warning={warning}
+    openPopup={() => setPopupOpen(true)}
+  >
+    <TipTapEditor content={informasi} onChange={v => { setInformasi(v); setIsDirty(true); }} />
+    <TipTapEditor content={etimologi} onChange={v => { setEtimologi(v); setIsDirty(true); }} />
+
+    {/* Buttons now INSIDE the form card */}
+    <div className="flex items-center gap-4 mt-4">
+      <button
+        className="px-4 py-2 bg-sekunder text-white rounded-figma-md hover:bg-tersier transition"
+        onClick={() => saveMakna("draft")}
+        disabled={!canCreate}
+      >
+        Save Draft
       </button>
 
-      <MaknaEditor content={informasi} onChange={(v) => { setInformasi(v); setIsDirty(true); }} />
-      <MaknaEditor content={etimologi} onChange={(v) => { setEtimologi(v); setIsDirty(true); }} />
+      <button
+        className="px-4 py-2 bg-tersier text-white rounded-figma-md hover:bg-sekunder transition"
+        onClick={() => saveMakna(canCreate ? "terbit" : "direview")}
+      >
+        {canCreate ? "Submit" : "Submit for Review"}
+      </button>
 
-      <input type="file" onChange={e => handleGambarChange(e.target.files?.[0] || null)} />
-      {gambarPreview && <img src={gambarPreview} className="w-32 mt-2" />}
-
-      <div>
-        <label className="block mb-2 font-medium">Tags</label>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {tags.map(tag => (
-            <span key={tag} className="flex items-center bg-gray-200 px-3 py-1 rounded-full text-sm">
-              {tag}
-              <button onClick={() => setTags(tags.filter(t => t !== tag))} className="ml-2 text-red-500 hover:text-red-700">×</button>
-            </span>
-          ))}
-        </div>
-        <input
-          type="text"
-          value={tagInput}
-          placeholder="Type a tag and press Enter"
-          onChange={e => setTagInput(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === "Enter" && tagInput.trim()) {
-              e.preventDefault();
-              if (!tags.includes(tagInput.trim())) setTags([...tags, tagInput.trim()]);
-              setTagInput("");
-              setIsDirty(true);
-            }
-          }}
-          className="w-full border rounded px-3 py-2"
-        />
+      {saving && <span className="text-gray-500">Saving...</span>}
+    </div>
+  </MaknaForm>
       </div>
 
-      <div className="flex gap-4 mt-4">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={() => saveMakna("draft")} disabled={!canCreate}>Save Draft</button>
-        <button className="px-4 py-2 bg-green-600 text-white rounded" onClick={() => saveMakna(canCreate ? "terbit" : "direview")}>
-          {canCreate ? "Submit" : "Submit for Review"}
-        </button>
-        {saving && <span className="text-gray-500">Saving...</span>}
-      </div>
-
-      {warning && <p className="text-sm text-red-600">{warning}</p>}
-
-      <WordPopup open={popupOpen} setOpen={setPopupOpen} onSelect={(w: any) => { setSelectedWord(w); setPopupOpen(false); setIsDirty(true); }} />
+      <WordPopup
+        open={popupOpen}
+        setOpen={setPopupOpen}
+        onSelect={(w: Word) => { setSelectedWord(w); setPopupOpen(false); setIsDirty(true); }}
+      />
     </div>
   );
 }

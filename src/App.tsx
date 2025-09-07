@@ -10,7 +10,6 @@ import Layout from "./components/fixed/Layout";
 
 import Beranda from "./routes/Beranda";
 import TentangWebsite from "./routes/about/TentangWebsite";
-import Timeline from "./routes/about/Timeline";
 import Intro from "./routes/about/Intro";
 
 import Kamus from "./routes/kamus/Kamus";
@@ -59,8 +58,6 @@ const router = createBrowserRouter([
     children: [
       { path: "/", element: <Beranda /> },
       { path: "/tentang-website", element: <TentangWebsite /> },
-      { path: "/timeline", element: <Timeline /> },
-      { path: "/intro", element: <Intro /> },
 
       { path: "/kamus", element: <Kamus /> },
 
@@ -79,6 +76,8 @@ const router = createBrowserRouter([
   },
 
   // Routes outside Layout
+  { path: "/intro", element: <Intro /> },
+
   {
     path: "/kamus/buat",
     element: (

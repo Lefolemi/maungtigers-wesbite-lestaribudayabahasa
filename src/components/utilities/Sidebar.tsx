@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { ChevronLeft } from "lucide-react";
 
 type Tab = {
   key: string;
@@ -7,7 +8,7 @@ type Tab = {
 
 type SidebarProps = {
   basePath: string;        // e.g. "/profile"
-  tabs: readonly Tab[];            // tab definitions
+  tabs: readonly Tab[];    // tab definitions
   activeTab: string;       // current active key
 };
 
@@ -15,12 +16,13 @@ export default function Sidebar({ basePath, tabs, activeTab }: SidebarProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="w-48 bg-gray-100 p-4 flex flex-col gap-2">
+    <div className="w-48 bg-sekunder p-4 flex flex-col gap-2">
       {/* Back button */}
       <button
-        className="text-left text-blue-600 hover:underline"
+        className="flex items-center gap-2 text-left p-2 rounded hover:bg-tersier/80 text-white transition"
         onClick={() => navigate("/")}
       >
+        <ChevronLeft size={16} />
         Kembali
       </button>
 
@@ -28,8 +30,8 @@ export default function Sidebar({ basePath, tabs, activeTab }: SidebarProps) {
       {tabs.map((t) => (
         <button
           key={t.key}
-          className={`text-left p-2 rounded hover:bg-gray-200 ${
-            activeTab === t.key ? "bg-gray-300 font-bold" : ""
+          className={`text-left p-2 rounded hover:bg-tersier/80 text-white flex items-center transition ${
+            activeTab === t.key ? "bg-tersier font-bold" : ""
           }`}
           onClick={() => navigate(`${basePath}/${t.key}`)}
         >

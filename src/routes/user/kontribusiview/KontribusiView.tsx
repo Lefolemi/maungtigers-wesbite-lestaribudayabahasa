@@ -35,9 +35,15 @@ export default function KontribusiView(): JSX.Element {
   }, [tab, navigate, tabs]);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-primer">
+      {/* Sidebar */}
       <Sidebar basePath="/lihat-kontribusi" tabs={tabs} activeTab={activeTab} />
-      <div className="flex-1 p-4 bg-white">{activeContent}</div>
+
+      {/* Main content 90% with bigger padding */}
+      <div className="bg-white w-9/10 p-8">{activeContent}</div>
+
+      {/* Right 10% just background */}
+      <div className="w-1/10"></div>
     </div>
   );
 }

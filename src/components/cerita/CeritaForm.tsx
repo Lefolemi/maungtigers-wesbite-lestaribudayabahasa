@@ -1,4 +1,5 @@
 // src/components/cerita/CeritaForm.tsx
+import { type ReactNode } from "react";
 import ArticleEditor from "../cerita/CeritaEditor";
 
 interface CeritaFormProps {
@@ -10,9 +11,10 @@ interface CeritaFormProps {
   setTags: (tags: string[]) => void;
   tagInput: string;
   setTagInput: (input: string) => void;
-  content: any;
-  onContentChange: (content: any) => void;
+  content?: any; // optional because we may use TipTapEditor as children
+  onContentChange?: (content: any) => void; // optional
   warning?: string | null;
+  children?: ReactNode; // ✅ add children support
 }
 
 export default function CeritaForm({
@@ -27,6 +29,7 @@ export default function CeritaForm({
   content,
   onContentChange,
   warning,
+  children, // accept children
 }: CeritaFormProps) {
   return (
     <div className="p-8 space-y-6">
@@ -39,7 +42,7 @@ export default function CeritaForm({
       <input
         type="text"
         value={title}
-        placeholder="Enter your story title"
+        placeholder="Masukan judul cerita..."
         onChange={(e) => setTitle(e.target.value)}
         className="w-full border rounded px-3 py-2 text-lg"
       />
@@ -86,7 +89,8 @@ export default function CeritaForm({
           onKeyDown={(e) => {
             if (e.key === "Enter" && tagInput.trim()) {
               e.preventDefault();
-              if (!tags.includes(tagInput.trim())) setTags([...tags, tagInput.trim()]);
+              if (!tags.includes(tagInput.trim()))
+                setTags([...tags, tagInput.trim()]);
               setTagInput("");
             }
           }}
@@ -94,7 +98,8 @@ export default function CeritaForm({
         />
       </div>
 
-      <ArticleEditor content={content} onChange={onContentChange} />
+      {/* Editor */}
+      {children ?? <ArticleEditor content={content} onChange={onContentChange!} />}
     </div>
   );
 }

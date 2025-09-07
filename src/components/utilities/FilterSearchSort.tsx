@@ -1,9 +1,5 @@
-import { useState, useEffect } from "react";
-
-export interface Tag {
-  tag_id?: number;
-  nama_tag: string;
-}
+import { useState } from "react";
+import DropdownSelect from "../ui/DropdownSelect"; // adjust path if needed
 
 export interface FilterSearchSortProps {
   searchWord: string;
@@ -18,6 +14,7 @@ export interface FilterSearchSortProps {
   setSortBy: (val: "date" | "word") => void;
   sortOrder: "asc" | "desc";
   setSortOrder: (val: "asc" | "desc") => void;
+  showStatusFilter?: boolean; // new toggle
 }
 
 export default function FilterSearchSort({
@@ -33,58 +30,90 @@ export default function FilterSearchSort({
   setSortBy,
   sortOrder,
   setSortOrder,
+  showStatusFilter = true, // default true
 }: FilterSearchSortProps) {
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const sortByOptions = [
+    { value: "date", label: "Waktu" },
+    { value: "word", label: "Kata" },
+  ];
+
+  const sortOrderOptions = [
+    { value: "desc", label: "Akhir" },
+    { value: "asc", label: "Awal" },
+  ];
+
+  const statusOptions = [
+    { value: "", label: "-- Pilih status --" },
+    { value: "draft", label: "Draft" },
+    { value: "direview", label: "Direview" },
+    { value: "terbit", label: "Terbit" },
+    { value: "arsip", label: "Arsip" },
+  ];
 
   return (
     <div className="mb-4">
-      {/* Search + Advanced Filter toggle */}
+      {/* Search + Filter toggle */}
       <div className="flex gap-2 mb-2 flex-wrap">
         <input
           type="text"
           placeholder="Search by word..."
-          className="border px-3 py-1 rounded flex-1 min-w-[200px]"
+          className="border px-3 py-1 rounded-figma-md flex-1 min-w-[200px]"
           value={searchWord}
           onChange={(e) => setSearchWord(e.target.value)}
         />
         <button
-          className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700"
-          onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+          className="px-3 py-1 bg-sekunder text-white rounded-figma-md hover:bg-sekunder/90"
+          onClick={() => setIsFilterOpen(!isFilterOpen)}
         >
-          Advanced Filter
+          Filter
         </button>
       </div>
 
-      {/* Sort By */}
+      {/* Sort by with DropdownSelect */}
       <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <label className="font-medium">Sort by:</label>
-        <select
-          className="border px-3 py-1 rounded"
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as "date" | "word")}
-        >
-          <option value="date">Date</option>
-          <option value="word">Word</option>
-        </select>
+        <div className="flex gap-0 w-max">
+          <button className="px-3 py-1 border border-black rounded-l-figma-md bg-white cursor-default">
+            Urutkan
+          </button>
+          <DropdownSelect
+            value={sortBy}
+            onChange={setSortBy}
+            options={sortByOptions}
+            placeholder="Pilih..."
+            roundedLeft={false}
+            roundedRight={true}
+            border={false}
+            className="!bg-sekunder w-36"
+          />
+        </div>
 
-        <select
-          className="border px-3 py-1 rounded"
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
-        >
-          <option value="desc">Descending</option>
-          <option value="asc">Ascending</option>
-        </select>
+        <div className="flex gap-0 w-max">
+          <button className="px-3 py-1 border border-black rounded-l-figma-md bg-white cursor-default">
+            Dari
+          </button>
+          <DropdownSelect
+            value={sortOrder}
+            onChange={setSortOrder}
+            options={sortOrderOptions}
+            placeholder="Pilih..."
+            roundedLeft={false}
+            roundedRight={true}
+            border={false}
+            className="!bg-sekunder w-36"
+          />
+        </div>
       </div>
 
-      {/* Inline Advanced Filter */}
-      {isAdvancedOpen && (
-        <div className="border p-4 rounded mb-4 bg-gray-50">
+      {/* Inline Filter */}
+      {isFilterOpen && (
+        <div className="border p-4 rounded-l-figma-md mb-4 bg-sekunder/10">
           {/* Tags input */}
           <div className="mb-4">
-            <label className="block mb-2 font-medium">Tags</label>
+            <label className="block mb-2 font-medium text-black">Pilih tag</label>
             <div className="flex flex-wrap gap-2 mb-2">
-              {filterTags.map((tag) => (
+              {filterTags.map((tag: string) => (
                 <span
                   key={tag}
                   className="flex items-center bg-gray-200 px-3 py-1 rounded-full text-sm"
@@ -104,7 +133,7 @@ export default function FilterSearchSort({
             <input
               type="text"
               value={tagInput}
-              placeholder="Type a tag and press Enter"
+              placeholder="Ketik tag dan tekan enter"
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && tagInput.trim()) {
@@ -114,43 +143,41 @@ export default function FilterSearchSort({
                   setTagInput("");
                 }
               }}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border rounded-figma-md px-3 py-2"
             />
           </div>
 
-          {/* Status select */}
-          <div className="mb-4">
-            <label className="block mb-2 font-medium">Status</label>
-            <select
-              className="w-full border rounded px-3 py-2"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="">-- Select status --</option>
-              <option value="draft">Draft</option>
-              <option value="direview">Direview</option>
-              <option value="terbit">Terbit</option>
-              <option value="arsip">Arsip</option>
-            </select>
-          </div>
+          {/* Status select using DropdownSelect (toggleable) */}
+          {showStatusFilter && (
+            <div className="mb-4">
+              <label className="block mb-2 font-medium text-black">Status</label>
+              <DropdownSelect
+                value={filterStatus}
+                onChange={setFilterStatus}
+                options={statusOptions}
+                placeholder="Pilih status..."
+                className="!bg-sekunder w-full"
+              />
+            </div>
+          )}
 
           {/* Clear & Close buttons */}
           <div className="flex justify-end gap-2 mt-4">
             <button
-              className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              className="px-4 py-2 bg-gray-500 rounded-figma-md text-white hover:bg-gray-500/90"
               onClick={() => {
                 setFilterTags([]);
                 setTagInput("");
                 setFilterStatus("");
               }}
             >
-              Clear
+              Bersihkan
             </button>
             <button
-              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-              onClick={() => setIsAdvancedOpen(false)}
+              className="px-4 py-2 bg-sekunder text-white rounded-figma-md hover:bg-sekunder/90"
+              onClick={() => setIsFilterOpen(false)}
             >
-              Close
+              Tutup
             </button>
           </div>
         </div>

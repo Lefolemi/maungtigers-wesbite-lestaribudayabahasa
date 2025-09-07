@@ -30,9 +30,15 @@ export default function Dashboard(): JSX.Element {
   }, [tab, navigate]);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-primer">
+      {/* Sidebar */}
       <Sidebar basePath="/dashboard" tabs={tabs} activeTab={activeTab} />
-      <div className="flex-1 p-4 bg-white">{activeContent}</div>
+
+      {/* Main content 90% */}
+      <div className="bg-white w-9/10 p-8">{activeContent}</div>
+
+      {/* Right 10% background */}
+      <div className="w-1/10"></div>
     </div>
   );
 }

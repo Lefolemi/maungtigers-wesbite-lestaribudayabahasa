@@ -5,13 +5,11 @@ import Sidebar from "../../../components/utilities/Sidebar";
 import DetailProfile from "./Detail";
 import GantiEmail from "./Email";
 import GantiPassword from "./Password";
-import Debug from "./Debug";
 
 const tabs = [
   { key: "detail", label: "Detail", component: <DetailProfile /> },
   { key: "email", label: "Email", component: <GantiEmail /> },
   { key: "password", label: "Password", component: <GantiPassword /> },
-  { key: "debug", label: "Debug", component: <Debug /> },
 ] as const;
 
 type Tab = (typeof tabs)[number]["key"];
@@ -30,9 +28,15 @@ export default function Profile(): JSX.Element {
   }, [tab, navigate]);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-primer">
+      {/* Sidebar */}
       <Sidebar basePath="/profile" tabs={tabs} activeTab={activeTab} />
-      <div className="flex-1 p-4 bg-white">{activeContent}</div>
+
+      {/* Main content 80% with bigger padding */}
+      <div className="bg-white w-9/10 p-8">{activeContent}</div>
+
+      {/* Right 20% just background */}
+      <div className="w-1/10"></div>
     </div>
   );
 }

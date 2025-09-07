@@ -1,13 +1,11 @@
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import { useUserPerizinan } from "../../backend/context/UserPerizinanContext";
-import { useUserSession } from "../../backend/context/UserSessionContext";
+import NavbarDesktop from "./NavbarDesktop";
+import NavbarMobile from "./NavbarMobile";
 
 type NavItem = {
   label: string;
   path?: string;
   children?: { label: string; path: string; requiresArtikelPermission?: boolean }[];
-  align?: "left" | "right";
+  align: "left" | "right";
 };
 
 const navItems: NavItem[] = [
@@ -17,7 +15,6 @@ const navItems: NavItem[] = [
     align: "left",
     children: [
       { label: "Tentang Website", path: "/tentang-website" },
-      { label: "Timeline", path: "/timeline" },
     ],
   },
   {
@@ -43,128 +40,10 @@ const navItems: NavItem[] = [
 ];
 
 export default function Navbar() {
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const { user, logout } = useUserSession();
-  const { permissions } = useUserPerizinan();
-
-  const canCreateArtikel = permissions["artikel"]?.boleh_buat ?? false;
-  const canCreateKamus = permissions["kamus"]?.boleh_buat ?? false;
-
-  const menuItemClass = "block px-4 py-2 hover:bg-gray-100 w-full text-left";
-
-  const renderNavItem = (item: NavItem) => {
-    let children = item.children;
-
-    if (children && children.length > 0) {
-      const visibleChildren = children.filter((child) => {
-        if (child.requiresArtikelPermission) return canCreateArtikel;
-        if (child.path === "/kamus/buat") return canCreateKamus;
-        return true;
-      });
-
-      if (visibleChildren.length === 0) return null;
-
-      return (
-        <div
-          key={item.label}
-          className="relative"
-          onMouseEnter={() => setOpenDropdown(item.label)}
-          onMouseLeave={() => setOpenDropdown(null)}
-        >
-          <button className="hover:underline">{item.label}</button>
-          {openDropdown === item.label && (
-            <div className="absolute left-0 mt-2 bg-white text-black rounded shadow-md z-10 min-w-max">
-              {visibleChildren.map((child) => (
-                <Link key={child.path} to={child.path} className={menuItemClass}>
-                  {child.label}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <Link key={item.path} to={item.path!} className="hover:underline">
-        {item.label}
-      </Link>
-    );
-  };
-
   return (
-    <nav className="bg-blue-600 text-white px-4 py-3 shadow-md">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Left nav */}
-        <div className="flex items-center space-x-6">
-          {navItems.filter((i) => i.align === "left").map(renderNavItem)}
-        </div>
-
-        {/* Right nav */}
-        <div className="space-x-4 relative flex items-center">
-          {user ? (
-            <>
-              {navItems.filter((i) => i.align === "right").map(renderNavItem)}
-
-              {/* Profile dropdown */}
-              <div
-                className="relative"
-                onMouseEnter={() => setOpenDropdown("auth")}
-                onMouseLeave={() => setOpenDropdown(null)}
-              >
-                <button className="flex items-center space-x-2 hover:underline">
-                  {user.profile_pic ? (
-                    <img
-                      src={user.profile_pic}
-                      alt="Profile"
-                      style={{ width: "38px", height: "38px" }}
-                      className="rounded-full object-cover border"
-                    />
-                  ) : (
-                    <div className="size-6 @sm:size-7 @md:size-8 rounded-full bg-gray-300 flex items-center justify-center text-sm">
-                      {user.username?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
-                    </div>
-                  )}
-                  <span>{user.username || user.email}</span>
-                </button>
-                {openDropdown === "auth" && (
-                  <div className="absolute right-0 mt-2 bg-white text-black rounded shadow-md z-10 min-w-max">
-                    <Link to="/profile" className={menuItemClass}>
-                      Profile
-                    </Link>
-                    <Link to="/dashboard" className={menuItemClass}>
-                      Dashboard
-                    </Link>
-                    <Link to="/lihat-kontribusi" className={menuItemClass}>
-                      Kontribusi
-                    </Link>
-                    <Link to="/pengaturan-website" className={menuItemClass}>
-                      Pengaturan Website
-                    </Link>
-                    <button
-                      onClick={logout}
-                      className={
-                        menuItemClass + " cursor-pointer appearance-none bg-transparent border-0"
-                      }
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <>
-              <Link to="/register" className="hover:underline">
-                Register
-              </Link>
-              <Link to="/login" className="hover:underline">
-                Login
-              </Link>
-            </>
-          )}
-        </div>
-      </div>
-    </nav>
+    <>
+      <NavbarDesktop navItems={navItems} />
+      <NavbarMobile navItems={navItems} />
+    </>
   );
 }

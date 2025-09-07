@@ -95,7 +95,7 @@ export default function CropImage({ onComplete, onCancel }: CropImageProps) {
       />
       <label
         htmlFor="crop-upload"
-        className="px-3 py-1 text-sm rounded bg-blue-600 text-white cursor-pointer"
+        className="px-3 py-2 text-md rounded-figma-md bg-sekunder text-white cursor-pointer"
       >
         {imageSrc ? "Pilih Ulang" : "Upload Foto"}
       </label>
@@ -119,7 +119,7 @@ export default function CropImage({ onComplete, onCancel }: CropImageProps) {
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
                 onClick={() => setZoom((z) => Math.max(1, z - 0.1))}
-                className="px-3 py-1 rounded bg-gray-200"
+                className="px-3 py-1 rounded-figma-md bg-gray-200"
               >
                 -
               </button>
@@ -134,7 +134,7 @@ export default function CropImage({ onComplete, onCancel }: CropImageProps) {
               />
               <button
                 onClick={() => setZoom((z) => Math.min(3, z + 0.1))}
-                className="px-3 py-1 rounded bg-gray-200"
+                className="px-3 py-1 rounded-figma-md bg-gray-200"
               >
                 +
               </button>
@@ -143,13 +143,13 @@ export default function CropImage({ onComplete, onCancel }: CropImageProps) {
             <div className="flex gap-2 ml-auto">
               <button
                 onClick={handleConfirm}
-                className="px-4 py-2 rounded bg-green-600 text-white"
+                className="px-4 py-2 rounded-figma-md bg-green-600 text-white"
               >
                 Confirm
               </button>
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 rounded bg-gray-500 text-white"
+                className="px-4 py-2 rounded-figma-md bg-gray-500 text-white"
               >
                 Cancel
               </button>

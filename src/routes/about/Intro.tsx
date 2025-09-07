@@ -1,112 +1,89 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import Quiz from "../../components/quiz/Quiz";
+import { demoSlides, type DemoSlide } from "../../components/quiz/DemoSlides";
+import { introBackgrounds } from "../../components/quiz/IntroBackgrounds";
 
-interface DemoSlide {
-  title: string;
-  content?: string;
-  image?: string;
-  isQuiz?: boolean;
-}
-
-const slides: DemoSlide[] = [
-  {
-    title: "What is Bahasa Indah Nusantara?",
-    content:
-      "A platform to explore and preserve the richness of Indonesian words, stories, and meanings.",
-  },
-  {
-    title: "Why it matters",
-    content:
-      "We aim to celebrate the beauty of language and connect people with cultural heritage.",
-  },
-  {
-    title: "How you can participate",
-    content:
-      "Read, explore, and contribute your own stories or meanings if you sign up.",
-  },
-  {
-    title: "Demo Quiz",
-    isQuiz: true,
-  },
-];
-
-export default function DemoPage() {
+export default function Intro() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [totalCorrect, setTotalCorrect] = useState(0);
+  const [totalWrong, setTotalWrong] = useState(0);
+
+  const currentSlide: DemoSlide = demoSlides[currentIndex];
+  const currentBg = introBackgrounds[currentIndex];
 
   const nextSlide = () => {
-    if (currentIndex < slides.length - 1) setCurrentIndex(currentIndex + 1);
+    if (currentIndex < demoSlides.length - 1) setCurrentIndex(currentIndex + 1);
   };
 
-  const prevSlide = () => {
-    if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
+  const handleQuizFinish = (correct: number, wrong: number) => {
+    setTotalCorrect(totalCorrect + correct);
+    setTotalWrong(totalWrong + wrong);
+    nextSlide();
   };
-
-  const currentSlide = slides[currentIndex];
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="flex items-center justify-center min-h-screen bg-black-100 p-4 relative overflow-hidden">
+      {currentBg && (
+        <>
+          <div
+            className="absolute inset-0 bg-center bg-cover"
+            style={{ backgroundImage: `url(${currentBg})` }}
+          />
+          <div className="absolute inset-0 bg-primer/60" />
+        </>
+      )}
+
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -50 }}
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -50 }}
           transition={{ duration: 0.3 }}
-          className="bg-white shadow-md rounded-lg p-6"
+          className="relative bg-white/80 shadow-xl rounded-figma-lg p-8 w-full max-w-3xl flex flex-col items-center z-10 backdrop-blur-md"
         >
           {!currentSlide.isQuiz ? (
             <>
-              <h2 className="text-xl font-bold mb-2">{currentSlide.title}</h2>
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-center text-gray-900">
+                {currentSlide.title}
+              </h2>
               {currentSlide.content && (
-                <p className="text-gray-700 mb-4">{currentSlide.content}</p>
+                <p className="text-gray-700 mb-6 text-center">{currentSlide.content}</p>
               )}
-              {currentSlide.image && (
-                <img
-                  src={currentSlide.image}
-                  alt={currentSlide.title}
-                  className="mb-4 rounded"
-                />
-              )}
-              <div className="flex justify-between">
+              {currentIndex < demoSlides.length - 1 && (
                 <button
-                  onClick={prevSlide}
-                  disabled={currentIndex === 0}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50"
+                  onClick={nextSlide}
+                  className="px-6 py-3 bg-sekunder text-white font-semibold rounded-lg hover:bg-sekunder/90 transition"
                 >
-                  Prev
+                  Selanjutnya
                 </button>
-                {currentIndex < slides.length - 1 ? (
-                  <button
-                    onClick={nextSlide}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                  >
-                    Next
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => alert("Demo finished!")}
-                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                  >
-                    Finish
-                  </button>
-                )}
-              </div>
+              )}
             </>
           ) : (
-            <Quiz />
+            <>
+              <Quiz questions={currentSlide.quizQuestions!} onFinish={handleQuizFinish} />
+              <div className="mt-4 text-center text-gray-700 font-medium">
+                Total Benar: {totalCorrect} | Total Salah: {totalWrong}
+              </div>
+            </>
           )}
 
-          {!currentSlide.isQuiz && (
-            <div className="flex justify-center mt-4 gap-2">
-              {slides.map((_, idx) => (
-                <span
-                  key={idx}
-                  className={`w-2 h-2 rounded-full ${
-                    idx === currentIndex ? "bg-blue-500" : "bg-gray-300"
-                  }`}
-                ></span>
-              ))}
+          {currentIndex === demoSlides.length - 1 && (
+            <div className="flex flex-col md:flex-row gap-4 mt-6 justify-center w-full">
+              <Link
+                to="/cerita"
+                className="px-6 py-3 bg-primer text-white rounded-lg hover:bg-primer/90 text-center"
+              >
+                Lihat Cerita
+              </Link>
+              <Link
+                to="/makna-kata"
+                className="px-6 py-3 bg-tersier text-white rounded-lg hover:bg-tersier/90 text-center"
+              >
+                Lihat Makna Kata
+              </Link>
             </div>
           )}
         </motion.div>

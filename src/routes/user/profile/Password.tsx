@@ -73,8 +73,6 @@ export default function GantiPassword() {
 
   return (
     <div className="max-w-md mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Ganti Password</h1>
-
       <form onSubmit={handleChangePassword}>
         {/* Current Password */}
         <div className="mb-4">
@@ -86,7 +84,7 @@ export default function GantiPassword() {
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             placeholder="Masukkan password lama"
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border rounded-figma-md"
           />
         </div>
 
@@ -98,7 +96,7 @@ export default function GantiPassword() {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="Buat password yang kuat"
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border rounded-figma-md"
           />
 
           {newPassword && (
@@ -121,7 +119,7 @@ export default function GantiPassword() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Ketik ulang password baru"
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border rounded-figma-md"
           />
         </div>
 
@@ -129,7 +127,7 @@ export default function GantiPassword() {
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+          className="px-4 py-2 bg-tersier text-white rounded-figma-md hover:bg-red-900 disabled:opacity-50"
         >
           {loading ? "Mengganti..." : "Ganti Password"}
         </button>

@@ -1,10 +1,12 @@
 // src/routes/artikel/BuatArtikel.tsx
 import { useState, useEffect } from "react";
-import ArtikelForm from "../../components/artikel/ArtikelForm";
 import { useDraftManager } from "../../components/artikel/useAutosaveManager";
 import { simpanArtikel } from "../../components/artikel/simpanArtikel";
 import { usePrompt } from "../../components/utilities/usePrompt";
 import { useUserSession } from "../../backend/context/UserSessionContext";
+import NavbarBarebone from "../../components/ui/NavbarBarebone";
+import ArtikelForm from "../../components/artikel/ArtikelForm";
+import TipTapEditor from "../../components/ui/TipTapEditor";
 
 // 🔹 Utility: generate slug from title
 function slugify(text: string) {
@@ -17,6 +19,8 @@ function slugify(text: string) {
 }
 
 export default function BuatArtikel() {
+  const { user } = useUserSession();
+
   const [title, setTitle] = useState("");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
@@ -24,7 +28,6 @@ export default function BuatArtikel() {
   const [slug, setSlug] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagsCopy, setTagsCopy] = useState("");
-  const [test] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [artikelId, setArtikelId] = useState<number | null>(null);
 
@@ -33,19 +36,10 @@ export default function BuatArtikel() {
   const [warning, setWarning] = useState<string | null>(null);
   const [hasSavedDraft, setHasSavedDraft] = useState(false);
 
-  const { user } = useUserSession();
+  // Keep tagsCopy updated for autosave
+  useEffect(() => setTagsCopy(JSON.stringify(tags)), [tags]);
 
-  useEffect(() => {
-    setTagsCopy(JSON.stringify(tags));
-  }, [tags]);
-
-  const draftState = { 
-    title, 
-    content, 
-    thumbnailBase64: thumbnailPreview,
-    tagsCopy    // <-- store as string
-  };
-
+  const draftState = { title, content, thumbnailBase64: thumbnailPreview, tagsCopy };
   const { clearDraft } = useDraftManager("draft:artikel", draftState, () => {});
 
   usePrompt(
@@ -53,17 +47,18 @@ export default function BuatArtikel() {
     isDirty && !hasSavedDraft
   );
 
+  // Load last saved draft if available
   useEffect(() => {
     const saved = localStorage.getItem("draft:artikel");
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (confirm("Continue from last saved draft?")) {
+      if (confirm("Lanjutkan dari draft terakhir?")) {
         setTitle(parsed.title || "");
         setContent(parsed.content || null);
         if (parsed.thumbnailBase64) setThumbnailPreview(parsed.thumbnailBase64);
         if (parsed.tagsCopy) {
           try {
-            setTags(JSON.parse(parsed.tagsCopy)); // back to array
+            setTags(JSON.parse(parsed.tagsCopy));
           } catch {
             setTags([]);
           }
@@ -118,10 +113,10 @@ export default function BuatArtikel() {
     try {
       const savedArtikelId = await simpanArtikel({
         artikelId,
-        userId: user?.user_id, // <-- use actual logged-in user
+        userId: user?.user_id,
         title,
         content,
-        thumbnail, // ✅ pass File | null directly
+        thumbnail,
         slug: generatedSlug,
         tags,
         status,
@@ -145,45 +140,50 @@ export default function BuatArtikel() {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold">Create New Article</h1>
+    <div className="min-h-screen bg-primer">
+      <NavbarBarebone title="Buat Artikel" backTo="/" />
 
-      <ArtikelForm
-        title={title}
-        setTitle={setTitle}
-        slug={slug}
-        thumbnailPreview={thumbnailPreview}
-        onThumbnailChange={handleThumbnailChange}
-        tags={tags}
-        setTags={setTags}
-        tagInput={tagInput}
-        setTagInput={setTagInput}
-        content={content}
-        onContentChange={handleContentChange}
-        warning={warning}
-      />
+      <div className="max-w-4xl mx-auto p-6 bg-white rounded-figma-lg shadow-lg mt-6 space-y-6">
+        <ArtikelForm
+          title={title}
+          setTitle={setTitle}
+          slug={slug}
+          thumbnailPreview={thumbnailPreview}
+          onThumbnailChange={handleThumbnailChange}
+          tags={tags}
+          setTags={setTags}
+          tagInput={tagInput}
+          setTagInput={setTagInput}
+          warning={warning}
+        >
+          <TipTapEditor
+            content={content}
+            onChange={handleContentChange}
+            showImageButton={true}
+          />
+        </ArtikelForm>
 
-      {/* Exclusive buttons for BuatArtikel */}
-      <div className="flex items-center gap-4 mt-4">
-        <span className="text-sm text-gray-500">
-          {saving
-            ? "Saving..."
-            : hasSavedDraft
-            ? "Draft saved in DB"
-            : "All changes saved (locally)"}
-        </span>
-        <button
-          onClick={() => saveArtikel("draft")}
-          className="px-4 py-2 bg-blue-600 text-white rounded"
-        >
-          Save Draft
-        </button>
-        <button
-          onClick={() => saveArtikel("direview")}
-          className="px-4 py-2 bg-green-600 text-white rounded"
-        >
-          Submit for Review
-        </button>
+        <div className="flex items-center gap-4 mt-4">
+          <span className="text-sm text-gray-500">
+            {saving
+              ? "Saving..."
+              : hasSavedDraft
+              ? "Draft saved in DB"
+              : "All changes saved (locally)"}
+          </span>
+          <button
+            onClick={() => saveArtikel("draft")}
+            className="px-4 py-2 bg-sekunder text-white rounded-figma-md hover:bg-tersier transition"
+          >
+            Save Draft
+          </button>
+          <button
+            onClick={() => saveArtikel("direview")}
+            className="px-4 py-2 bg-tersier text-white rounded-figma-md hover:bg-sekunder transition"
+          >
+            Submit for Review
+          </button>
+        </div>
       </div>
     </div>
   );

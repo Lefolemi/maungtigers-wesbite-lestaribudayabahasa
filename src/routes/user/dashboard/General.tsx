@@ -1,7 +1,7 @@
-// src/routes/dashboard/GeneralDashboard.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../../backend/supabase";
 import { useUserSession } from "../../../backend/context/UserSessionContext";
+import DropdownSelect from "../../../components/ui/DropdownSelect";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar
@@ -30,13 +30,19 @@ export default function GeneralDashboard() {
   const [langData, setLangData] = useState<LanguageBreakdown[]>([]);
   const [filter, setFilter] = useState<"7d" | "30d" | "1y" | "all">("30d");
 
+  const filterOptions = [
+    { value: "7d", label: "7 Hari Terakhir" },
+    { value: "30d", label: "30 Hari Terakhir" },
+    { value: "1y", label: "1 Tahun Terakhir" },
+    { value: "all", label: "Semua Waktu" },
+  ];
+
   useEffect(() => {
     if (!user) return;
 
     const fetchData = async () => {
       setLoading(true);
 
-      // --- 1. Fetch all contributions ---
       const [ceritaRes, maknaRes, kamusRes] = await Promise.all([
         supabase.from("cerita").select("cerita_id, bahasa_id, tanggal_dibuat").eq("user_id", user.user_id),
         supabase.from("makna_kata").select("makna_id, bahasa_id, tanggal_dibuat").eq("user_id", user.user_id),
@@ -47,20 +53,18 @@ export default function GeneralDashboard() {
       const makna = maknaRes.data || [];
       const kamus = kamusRes.data || [];
 
-      // --- 2. Summary counts ---
       setSummary({
         cerita: cerita.length,
         makna: makna.length,
         kamus: kamus.length,
       });
 
-      // --- 3. Filter by date range ---
       const now = new Date();
       const getLimitDate = () => {
         if (filter === "7d") return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         if (filter === "30d") return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
         if (filter === "1y") return new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-        return null; // "all"
+        return null;
       };
       const limitDate = getLimitDate();
 
@@ -71,7 +75,6 @@ export default function GeneralDashboard() {
       const maknaF = filterByDate(makna);
       const kamusF = filterByDate(kamus);
 
-      // --- 4. Line chart grouping ---
       const all: { date: string; type: ContributionType }[] = [
         ...ceritaF.map(c => ({ date: c.tanggal_dibuat, type: "cerita" as const })),
         ...maknaF.map(m => ({ date: m.tanggal_dibuat, type: "makna" as const })),
@@ -82,22 +85,18 @@ export default function GeneralDashboard() {
       all.forEach(item => {
         const d = new Date(item.date);
         const key = d.toISOString().split("T")[0];
-        if (!byDate[key]) {
-          byDate[key] = { date: key, cerita: 0, makna: 0, kamus: 0 };
-        }
+        if (!byDate[key]) byDate[key] = { date: key, cerita: 0, makna: 0, kamus: 0 };
         byDate[key][item.type] += 1;
       });
 
       setLineData(Object.values(byDate).sort((a, b) => (a.date > b.date ? 1 : -1)));
 
-      // --- 5. Pie data ---
       setPieData([
         { name: "Cerita", value: ceritaF.length },
         { name: "Makna Kata", value: maknaF.length },
         { name: "Kamus", value: kamusF.length },
       ]);
 
-      // --- 6. Language breakdown ---
       const langCount: Record<number, number> = {};
       [...cerita, ...makna, ...kamus].forEach(item => {
         langCount[item.bahasa_id] = (langCount[item.bahasa_id] || 0) + 1;
@@ -133,17 +132,13 @@ export default function GeneralDashboard() {
       <h1 className="text-2xl font-bold mb-4">📊 Dashboard Keseluruhan</h1>
 
       {/* Filter Dropdown */}
-      <div className="mb-4">
-        <select
+      <div className="mb-4 w-48">
+        <DropdownSelect
           value={filter}
-          onChange={(e) => setFilter(e.target.value as any)}
-          className="border rounded p-2"
-        >
-          <option value="7d">7 Hari Terakhir</option>
-          <option value="30d">30 Hari Terakhir</option>
-          <option value="1y">1 Tahun Terakhir</option>
-          <option value="all">Semua Waktu</option>
-        </select>
+          onChange={setFilter}
+          options={filterOptions}
+          placeholder="Pilih rentang waktu"
+        />
       </div>
 
       {/* Summary Cards */}

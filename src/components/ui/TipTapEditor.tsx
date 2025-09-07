@@ -1,17 +1,21 @@
-// src/components/cerita/CeritaEditor.tsx
-import { useEffect } from "react";
+// src/components/common/TipTapEditor.tsx
+import { useRef, useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { Bold, Italic, Strikethrough, Quote } from "lucide-react";
+import Image from "@tiptap/extension-image";
+import { Bold, Italic, Strikethrough, Quote, Image as ImageIcon } from "lucide-react";
 
 type Props = {
   content: any;
   onChange: (content: any) => void;
+  showImageButton?: boolean; // optional toggle
 };
 
-export default function CeritaEditor({ content, onChange }: Props) {
+export default function TipTapEditor({ content, onChange, showImageButton = false }: Props) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: showImageButton ? [StarterKit, Image] : [StarterKit],
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getJSON());
@@ -25,6 +29,16 @@ export default function CeritaEditor({ content, onChange }: Props) {
       editor.commands.setContent(content, { emitUpdate: false });
     }
   }, [content, editor]);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editor) return;
+
+    const localUrl = URL.createObjectURL(file);
+    editor.chain().focus().setImage({ src: localUrl }).run();
+
+    // Optional: handle upload to server if needed
+  };
 
   if (!editor) return null;
 
@@ -63,6 +77,25 @@ export default function CeritaEditor({ content, onChange }: Props) {
         >
           <Quote size={18} />
         </button>
+
+        {showImageButton && (
+          <>
+            <button
+              type="button"
+              className="p-2 bg-gray-200 rounded"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <ImageIcon size={18} />
+            </button>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleImageSelect}
+            />
+          </>
+        )}
       </div>
 
       {/* Editor */}

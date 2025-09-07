@@ -1,15 +1,32 @@
-@import "tailwindcss/preflight";
-@tailwind utilities;
+@import "tailwindcss";
 
 body {
-    font-family: theme('fontFamily.sans'); /* Optional fallback for font-sans */
+  @apply font-sans bg-primer text-black;
+}
+
+@theme {
+    --color-primer: #AF885E;
+    --color-sekunder: #371534;
+    --color-tersier: #6D1A36;
+    --color-csv: #1C9A13;
+    --color-draft: #F2FD7C;
+    --color-terbit: #B7F44E;
+    --color-kamus: #1E6D1A;
+    --color-cerita: #361A6D;
+    --color-makna: #6D6A1A;
+    --color-black: #000000;
+    --color-white: #FFFFFF;
+
+    /* custom border radius */
+    --radius-figma-lg: 20px;
+    --radius-figma-md: 10px;
 }
 
 .prose img {
-    max-width: 100%;
-    max-height: 500px; /* prevents endless tall images */
-    height: auto;
-    object-fit: contain;
-    margin: auto;
-    display: block;
+  max-width: 100%;
+  max-height: 500px; /* prevents endless tall images */
+  height: auto;
+  object-fit: contain;
+  margin: auto;
+  display: block;
 }

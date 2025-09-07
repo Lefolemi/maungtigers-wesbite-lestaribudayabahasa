@@ -2,13 +2,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../backend/supabase";
 import { Link } from "react-router-dom";
+import FilterSearchSort from "../../components/utilities/FilterSearchSort";
 
 interface Tag {
   tag_id: number;
   nama_tag: string;
 }
 
-interface Artikel {
+export interface Artikel {
   artikel_id: number;
   judul: string;
   slug: string;
@@ -25,10 +26,19 @@ export default function Artikel() {
   const [artikels, setArtikels] = useState<Artikel[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Search/filter/sort state
+  const [searchWord, setSearchWord] = useState("");
+  const [filterTags, setFilterTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [sortBy, setSortBy] = useState<"date" | "word">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  const [filteredArtikels, setFilteredArtikels] = useState<Artikel[]>([]);
+
+  // Fetch articles
   useEffect(() => {
     const fetchArtikels = async () => {
       setLoading(true);
-
       const { data, error } = await supabase
         .from("artikel")
         .select(`
@@ -47,93 +57,160 @@ export default function Artikel() {
 
       if (error) {
         console.error("Failed to fetch articles:", error);
-      } else {
-        const mapped: Artikel[] = [];
-        for (const a of data || []) {
-          // fetch tags per article
-          const { data: tagsData } = await supabase
-            .from("artikel_tag")
-            .select(`tag:tag_id(nama_tag)`)
-            .eq("artikel_id", a.artikel_id);
-
-          const tags: Tag[] =
-            tagsData?.map((t: any) => ({
-              tag_id: t.tag.tag_id,
-              nama_tag: t.tag.nama_tag,
-            })) || [];
-
-          mapped.push({
-            artikel_id: a.artikel_id,
-            judul: a.judul,
-            slug: a.slug,
-            thumbnail: a.thumbnail,
-            konten: typeof a.konten === "string" ? JSON.parse(a.konten) : a.konten,
-            terakhir_edit: a.terakhir_edit,
-            tanggal_dibuat: a.tanggal_dibuat,
-            user_id: a.user_id,
-            author_nama: (a.user as any)?.nama || "Unknown",
-            tags,
-          });
-        }
-
-        setArtikels(mapped);
+        setLoading(false);
+        return;
       }
 
+      const mapped: Artikel[] = [];
+      for (const a of data || []) {
+        const { data: tagsData } = await supabase
+          .from("artikel_tag")
+          .select(`tag:tag_id(nama_tag)`)
+          .eq("artikel_id", a.artikel_id);
+
+        const tags: Tag[] =
+          tagsData?.map((t: any) => ({
+            tag_id: t.tag.tag_id,
+            nama_tag: t.tag.nama_tag,
+          })) || [];
+
+        mapped.push({
+          artikel_id: a.artikel_id,
+          judul: a.judul,
+          slug: a.slug,
+          thumbnail: a.thumbnail,
+          konten: typeof a.konten === "string" ? JSON.parse(a.konten) : a.konten,
+          terakhir_edit: a.terakhir_edit,
+          tanggal_dibuat: a.tanggal_dibuat,
+          user_id: a.user_id,
+          author_nama: (a.user as any)?.nama || "Unknown",
+          tags,
+        });
+      }
+
+      setArtikels(mapped);
+      setFilteredArtikels(mapped);
       setLoading(false);
     };
 
     fetchArtikels();
   }, []);
 
+  // Apply search/filter/sort
+  useEffect(() => {
+    let filtered = [...artikels];
+
+    if (searchWord.trim()) {
+      const lower = searchWord.toLowerCase();
+      filtered = filtered.filter(
+        (a) =>
+          a.judul.toLowerCase().includes(lower) ||
+          a.tags?.some((t) => t.nama_tag.toLowerCase().includes(lower))
+      );
+    }
+
+    if (filterTags.length > 0) {
+      filtered = filtered.filter((a) =>
+        filterTags.every((ft) => a.tags?.some((t) => t.nama_tag === ft))
+      );
+    }
+
+    filtered.sort((a, b) => {
+      if (sortBy === "date") {
+        const dateA = new Date(a.tanggal_dibuat).getTime();
+        const dateB = new Date(b.tanggal_dibuat).getTime();
+        return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+      } else {
+        return sortOrder === "asc"
+          ? a.judul.localeCompare(b.judul)
+          : b.judul.localeCompare(a.judul);
+      }
+    });
+
+    setFilteredArtikels(filtered);
+  }, [searchWord, artikels, filterTags, sortBy, sortOrder]);
+
   if (loading) return <p className="p-8">Loading...</p>;
   if (artikels.length === 0) return <p className="p-8">Belum ada artikel terbit.</p>;
 
   return (
-    <div className="p-8 space-y-6">
-      <h1 className="text-3xl font-bold mb-6">Daftar Artikel</h1>
-      <div className="grid md:grid-cols-2 gap-6">
-        {artikels.map((a) => (
-          <Link
-            key={a.artikel_id}
-            to={`/artikel/${a.slug}`}
-            className="border rounded p-4 hover:shadow-lg transition-shadow flex flex-col"
-          >
-            {a.thumbnail && (
-              <img
-                src={a.thumbnail}
-                alt={a.judul}
-                className="w-full h-40 object-cover rounded mb-3"
-              />
-            )}
-            <p className="text-sm text-gray-500 mb-1">
-              Terakhir edit: {a.terakhir_edit || a.tanggal_dibuat}
-            </p>
-            <h2 className="font-semibold text-lg mb-2">{a.judul}</h2>
-            {(a.tags ?? []).length > 0 && (
-              <div className="flex gap-2 flex-wrap mb-2">
-                {a.tags!.map((t) => (
-                  <span
-                    key={t.tag_id}
-                    className="text-xs bg-gray-200 px-2 py-1 rounded"
-                  >
-                    {t.nama_tag}
-                  </span>
-                ))}
+    <div className="bg-white min-h-screen">
+      {/* Hero Section */}
+      <div className="relative h-40 bg-primer flex items-center justify-center text-center px-6">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-white drop-shadow-lg">
+          Eksplorasi artikel
+        </h1>
+      </div>
+
+      <div className="p-8 space-y-6">
+        {/* Search / Filter / Sort */}
+        <FilterSearchSort
+          searchWord={searchWord}
+          setSearchWord={setSearchWord}
+          filterTags={filterTags}
+          setFilterTags={setFilterTags}
+          tagInput={tagInput}
+          setTagInput={setTagInput}
+          filterStatus="" // ignored in public view
+          setFilterStatus={() => {}} // no-op
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+          showStatusFilter={false} // <--- hide status dropdown
+        />
+
+        {/* Article cards */}
+        <div className="space-y-6">
+          {filteredArtikels.map((a) => (
+            <Link
+              key={a.artikel_id}
+              to={`/artikel/${a.slug}`}
+              className="flex flex-col md:flex-row bg-white border border-black rounded-lg shadow hover:shadow-lg transition overflow-hidden"
+            >
+              {a.thumbnail && (
+                <img
+                  src={a.thumbnail}
+                  alt={a.judul}
+                  className="w-full md:w-72 h-72 object-cover flex-shrink-0"
+                />
+              )}
+              <div className="p-6 flex flex-col justify-between flex-grow">
+                {/* Title */}
+                <h2 className="font-bold text-2xl mb-3">{a.judul}</h2>
+
+                {/* Tags */}
+                {a.tags && a.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {a.tags.map((t) => (
+                      <span
+                        key={t.tag_id}
+                        className="text-xs bg-gray-200 px-2 py-1 rounded"
+                      >
+                        {t.nama_tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Summary */}
+                {a.konten?.content && (
+                  <p className="text-gray-700 mb-3 flex-grow">
+                    {a.konten.content
+                      .filter((b: any) => b.type === "paragraph")
+                      .map((b: any) => b.content?.map((c: any) => c.text).join("") ?? "")
+                      .join(" ")
+                      .slice(0, 200)}
+                    {a.konten.content.length > 200 ? "..." : ""}
+                  </p>
+                )}
+
+                {/* Author */}
+                <p className="text-sm text-gray-500">By {a.author_nama}</p>
               </div>
-            )}
-            {a.konten?.content && (
-              <p className="text-gray-700 text-sm">
-                {a.konten.content
-                  .filter((b: any) => b.type === "paragraph")
-                  .map((b: any) => b.content?.map((c: any) => c.text).join("") ?? "")
-                  .join(" ")
-                  .slice(0, 100)}
-                {a.konten.content.length > 100 ? "..." : ""}
-              </p>
-            )}
-            <p className="text-xs text-gray-400 mt-auto">By {a.author_nama}</p>
-          </Link>
-        ))}
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
