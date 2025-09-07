@@ -1,3 +1,61 @@
+# Bahasa Indah Nusantara
+
+**Website:** [Bahasa Indah Nusantara](#)  
+**Team:** Maung Tigers UBL  
+**Deadline:** September 7th, 2025
+
+---
+
+## Deskripsi
+
+Bahasa Indah Nusantara adalah website yang mengangkat kekayaan bahasa dan budaya Indonesia. Website ini memungkinkan pengguna untuk:  
+
+- Menjelajahi **kamus bahasa** Nusantara.  
+- Membaca dan menulis **cerita tradisional atau fiksi**.  
+- Menambahkan dan mengelola **makna kata** secara interaktif.  
+- Mengakses artikel budaya yang sudah ditandai dengan **tag**.  
+- Moderator dan Admin dapat melakukan **review konten**, manajemen user, dan pengaturan izin.  
+
+Website ini dikembangkan dengan semangat **“peluk erat tradisi, gerakkan teknologi”**.
+
+---
+
+## Teknologi yang Digunakan
+
+- **Frontend:** React + TypeScript + Tailwind CSS v4.0  
+- **State Management:** React Context, custom hooks  
+- **Routing:** React Router v7  
+- **Backend / Database:** Supabase (PostgreSQL)  
+- **Deployment:** Vercel  
+- **Interactive Features:** Phaser.js (opsional, untuk minigames)  
+
+---
+
+## Struktur Project
+
+
+
+- **Admin Zone:** /admin-zone  
+  - Manage Users  
+  - Suspend Users  
+
+- **Moderator Zone:** /moderator-zone  
+  - Review konten (Cerita, Artikel, Makna Kata)  
+  - Report user & konten  
+  - Manage perizinan penulis  
+
+---
+
+## Fitur Utama
+
+- **CRUD Artikel, Cerita, Makna Kata** dengan status draft, review, publish  
+- **Tagging system** untuk artikel, cerita, dan makna kata  
+- **Kontribusi Viewer** untuk melihat karya user sendiri  
+- **Profile Management**: upload foto, ubah username, email, dan password  
+- **Modal system**: semua modal menggunakan React Portal untuk posisi yang tepat  
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
