@@ -161,7 +161,7 @@ export default function KontribusiMaknaKata() {
       <div className="my-4">
         <button
           onClick={() => navigate("/makna-kata/buat")}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="px-4 py-2 bg-sekunder text-white rounded hover:bg-sekunder/90"
         >
           Buat Makna Kata Baru
         </button>
@@ -209,14 +209,14 @@ export default function KontribusiMaknaKata() {
                 onClick={() =>
                   navigate("/makna-kata/preview", { state: { makna: m } })
                 }
-                className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="px-3 py-1 bg-sekunder text-white rounded hover:bg-sekunder/90"
               >
                 Lihat
               </button>
 
               <button
                 onClick={() => navigate(`/makna-kata/edit/${m.makna_id}`)}
-                className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                className="px-3 py-1 bg-tersier text-white rounded hover:bg-tersier/90"
               >
                 Edit
               </button>

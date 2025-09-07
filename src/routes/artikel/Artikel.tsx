@@ -136,11 +136,27 @@ export default function Artikel() {
   return (
     <div className="bg-white min-h-screen">
       {/* Hero Section */}
-      <div className="relative h-40 bg-primer flex items-center justify-center text-center px-6">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-white drop-shadow-lg">
-          Eksplorasi artikel
+      <div className="relative h-80 md:h-60 flex items-center justify-center text-center px-6 overflow-hidden">
+        {/* Background image */}
+        <div
+            className="absolute inset-0"
+            style={{
+            backgroundImage: `url('/tentang/mencatat.jpg')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            transform: "scale(1.2)",
+            }}
+        ></div>
+
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-primer/70"></div> {/* overlay with 70% opacity */}
+
+        {/* Hero Text */}
+        <h1 className="relative text-3xl md:text-4xl font-extrabold text-white drop-shadow-lg z-10">
+            Eksplorasi Artikel
         </h1>
-      </div>
+        </div>
 
       <div className="p-8 space-y-6">
         {/* Search / Filter / Sort */}

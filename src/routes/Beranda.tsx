@@ -4,47 +4,51 @@ import { Link } from "react-router-dom";
 export default function Beranda() {
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="relative min-h-[80vh] bg-gradient-to-b from-primer to-sekunder flex items-center justify-center text-center px-6">
-        <div className="max-w-3xl space-y-6">
-          {/* Main Title */}
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg">
-            SETIAP BAHASA DAERAH ADALAH WARISAN BUDAYA BERHARGA
-          </h1>
+      <div className="relative min-h-[80vh] flex items-center justify-center text-center px-6">
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/tentang/main_laptop.webp')" }}
+      />
 
-          {/* Intro Text */}
-          <p className="text-lg md:text-xl text-white/90 drop-shadow-sm">
-            Mari kita melestarikan bahasa-bahasa daerah dengan teknologi!
-          </p>
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-primer to-sekunder opacity-80"></div>
 
-          {/* Buttons Wrapper */}
-          <div className="flex flex-col gap-4 mt-6 w-full max-w-md mx-auto">
-            {/* INTRODUKSI Button */}
+      {/* Content */}
+      <div className="relative max-w-3xl space-y-6">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg">
+          SETIAP BAHASA DAERAH ADALAH WARISAN BUDAYA BERHARGA
+        </h1>
+
+        <p className="text-lg md:text-xl text-white/90 drop-shadow-sm">
+          Mari kita melestarikan bahasa-bahasa daerah dengan teknologi!
+        </p>
+
+        <div className="flex flex-col gap-4 mt-6 w-full max-w-md mx-auto">
+          <a
+            href="/intro"
+            className="px-6 py-3 bg-tersier text-white font-semibold rounded-figma-md shadow-lg hover:bg-red-500 transition w-full"
+          >
+            INTRODUKSI
+          </a>
+
+          <div className="flex flex-col md:flex-row gap-4 w-full">
             <a
-              href="/intro"
-              className="px-6 py-3 bg-tersier text-white font-semibold rounded-figma-md shadow-lg hover:bg-red-500 transition w-full"
+              href="/register"
+              className="flex-1 px-6 py-3 bg-sekunder text-white font-semibold rounded-figma-md shadow-lg hover:bg-sekunder/80 transition"
             >
-              INTRODUKSI
+              Gabung
             </a>
-
-            {/* Gabung + Telusuri Buttons */}
-            <div className="flex flex-col md:flex-row gap-4 w-full">
-              <a
-                href="/register"
-                className="flex-1 px-6 py-3 bg-sekunder text-white font-semibold rounded-figma-md shadow-lg hover:bg-sekunder/80 transition"
-              >
-                Gabung
-              </a>
-              <a
-                href="/kamus"
-                className="flex-1 px-6 py-3 bg-sekunder text-white font-semibold rounded-figma-md shadow-lg hover:bg-sekunder/80 transition"
-              >
-                Telusuri
-              </a>
-            </div>
+            <a
+              href="/kamus"
+              className="flex-1 px-6 py-3 bg-sekunder text-white font-semibold rounded-figma-md shadow-lg hover:bg-sekunder/80 transition"
+            >
+              Telusuri
+            </a>
           </div>
         </div>
       </div>
+    </div>
 
       {/* White Box Section: Tentang Kami */}
       <section className="w-full bg-white py-16">
@@ -86,7 +90,7 @@ export default function Beranda() {
                 className="w-40 h-40 object-cover rounded-figma-lg"
               />
               <p className="font-semibold text-lg text-center">Cintya</p>
-              <p className="text-gray-600 text-center">Pembuat Artikel</p>
+              <p className="text-gray-600 text-center">Riset dan dokumentai konten</p>
             </div>
           </div>
         </div>
@@ -102,9 +106,7 @@ export default function Beranda() {
 
           {/* Section Text */}
           <p className="text-white/90 max-w-3xl">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. 
-            Maecenas non laoreet odio. Fusce lobortis porttitor purus, vel vestibulum libero
-            pharetra vel.
+            Melestarikan bahasa daerah sangat penting karena bahasa merupakan bagian integral dari identitas budaya suatu komunitas. Bahasa mencerminkan sejarah, nilai, dan cara pandang masyarakat terhadap dunia. Kehilangan bahasa daerah berarti kehilangan sebagian dari warisan budaya yang tak ternilai harganya.
           </p>
 
           {/* Pelajari Selengkapnya Button */}
@@ -117,11 +119,13 @@ export default function Beranda() {
         </div>
       </section>
 
-      {/* Placeholder White Section for Image */}
-      <section className="w-full bg-white py-16">
-        <div className="max-w-6xl mx-auto px-6">
-          {/* This will be replaced with an image later */}
-        </div>
+      {/* White Section for Image */}
+      <section className="w-full">
+        <img
+          src="/tentang/peta_suku.png" // ganti sesuai file di public/
+          alt="Ilustrasi"
+          className="w-full object-cover"
+        />
       </section>
 
       {/* Full-width Section: Lestarikan Bahasa */}
@@ -133,7 +137,7 @@ export default function Beranda() {
               Ayo mulai lestarikan bahasa daerah di era modern
             </h3>
             <p className="text-white/90 max-w-3xl">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod ex at libero bibendum, nec gravida enim imperdiet.
+            Di era modern ini, pelestarian bahasa daerah dapat dilakukan dengan berbagai cara kreatif. Generasi muda dapat memanfaatkan teknologi dan media sosial untuk memperkenalkan dan menggunakan bahasa daerah. Misalnya, membuat konten digital seperti video, lagu, atau artikel yang menggunakan bahasa daerah dapat menarik minat generasi muda untuk lebih mengenal dan mencintai bahasa tersebut.
             </p>
             <Link
               to="/kamus"
@@ -149,7 +153,7 @@ export default function Beranda() {
               Bagaimana melestarikan bahasa daerah dapat melestarikan budaya lokal
             </h3>
             <p className="text-white/90 max-w-3xl">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod ex at libero bibendum, nec gravida enim imperdiet.
+            Bahasa daerah bukan hanya alat komunikasi, tetapi juga wadah untuk menyampaikan nilai-nilai budaya, cerita rakyat, dan kearifan lokal. Dengan melestarikan bahasa daerah, kita juga turut menjaga kelangsungan budaya lokal yang terkandung di dalamnya. Penggunaan bahasa daerah dalam kehidupan sehari-hari, pendidikan, dan kegiatan budaya dapat memperkuat ikatan sosial dan identitas budaya masyarakat.
             </p>
             <Link
               to="/artikel"
@@ -161,11 +165,13 @@ export default function Beranda() {
         </div>
       </section>
 
-      {/* Placeholder White Section for Image */}
-      <section className="w-full bg-white py-16">
-        <div className="max-w-6xl mx-auto px-6">
-          {/* This will be replaced with an image later */}
-        </div>
+      {/* White Section for Image */}
+      <section className="w-full">
+        <img
+          src="/tentang/adat_papua.jpg" // ganti sesuai file di public/
+          alt="Ilustrasi"
+          className="w-full object-cover"
+        />
       </section>
     </div>
   );

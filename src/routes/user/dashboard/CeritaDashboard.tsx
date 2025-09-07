@@ -100,7 +100,7 @@ export default function CeritaDashboard() {
   const COLORS = ["#8884d8", "#82ca9d", "#ffc658"];
 
   const bahasaOptions = [
-    { value: "all", label: "🌐 Semua Bahasa" },
+    { value: "all", label: "Semua Bahasa" },
     ...bahasaList.map(b => ({ value: b.bahasa_id, label: b.nama_bahasa })),
   ];
 

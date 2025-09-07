@@ -155,7 +155,7 @@ export default function KontribusiCerita() {
       <div className="my-4">
         <button
           onClick={() => navigate("/cerita/buat")}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="px-4 py-2 bg-sekunder text-white rounded hover:bg-sekunder/90"
         >
           Buat Cerita Baru
         </button>
@@ -203,14 +203,14 @@ export default function KontribusiCerita() {
                 onClick={() =>
                   navigate("/cerita/preview", { state: { cerita: c } })
                 }
-                className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="px-3 py-1 bg-sekunder text-white rounded hover:bg-sekunder/90"
               >
                 Lihat
               </button>
 
               <button
                 onClick={() => navigate(`/cerita/edit/${c.cerita_id}`)}
-                className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                className="px-3 py-1 bg-tersier text-white rounded hover:bg-tersier/90"
               >
                 Edit
               </button>
@@ -235,7 +235,7 @@ export default function KontribusiCerita() {
                     setCeritas((prev) => prev.filter((s) => s.cerita_id !== c.cerita_id));
                     setFilteredCeritas((prev) => prev.filter((s) => s.cerita_id !== c.cerita_id));
                   }}
-                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                  className="px-3 py-1 bg-red-700 text-white rounded hover:bg-red-800"
                 >
                   Hapus
                 </button>

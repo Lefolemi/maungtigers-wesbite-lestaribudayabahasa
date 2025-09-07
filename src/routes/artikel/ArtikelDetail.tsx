@@ -7,11 +7,11 @@ interface Artikel {
   judul: string;
   thumbnail?: string | null;
   slug: string;
-  konten: any; // Keep as any to handle TipTap JSON
+  konten: any; 
   terakhir_edit: string | null;
   user_id: number;
   author_nama: string;
-  tags: { tag_id: number; nama_tag: string }[]; // always an array now
+  tags: { tag_id: number; nama_tag: string }[];
 }
 
 export default function ArtikelDetail() {
@@ -45,7 +45,6 @@ export default function ArtikelDetail() {
         console.error(error);
         setArtikel(null);
       } else {
-        // Fetch tags separately
         const { data: tagsData } = await supabase
           .from("artikel_tag")
           .select(`tag:tag_id(nama_tag)`)
@@ -54,7 +53,7 @@ export default function ArtikelDetail() {
         const tags = tagsData?.map((t: any) => ({
           tag_id: t.tag.tag_id,
           nama_tag: t.tag.nama_tag,
-        })) || []; // <-- always an array
+        })) || [];
 
         setArtikel({
           judul: data.judul,
@@ -64,7 +63,7 @@ export default function ArtikelDetail() {
           terakhir_edit: data.terakhir_edit,
           user_id: data.user_id,
           author_nama: (data.user as any)?.nama || "Unknown",
-          tags, // set the array
+          tags,
         });
       }
 
@@ -74,38 +73,54 @@ export default function ArtikelDetail() {
     fetchArtikel();
   }, [slug]);
 
-  if (loading) return <p className="p-8">Loading...</p>;
-  if (!artikel) return <p className="p-8 text-red-600">Artikel tidak ditemukan.</p>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
+
+  if (!artikel)
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <p className="text-red-600 font-medium">Artikel tidak ditemukan.</p>
+      </div>
+    );
 
   return (
-    <div className="max-w-3xl mx-auto p-8 space-y-6">
-      <h1 className="text-3xl font-bold">{artikel.judul}</h1>
+    <div className="max-w-4xl mx-auto my-10 p-6 bg-white rounded-2xl shadow-xl">
+      {/* Title */}
+      <h1 className="text-4xl font-extrabold mb-4 text-gray-900">{artikel.judul}</h1>
+
+      {/* Thumbnail */}
       {artikel.thumbnail && (
         <img
           src={artikel.thumbnail}
           alt={artikel.judul}
-          className="w-full max-h-96 object-cover rounded"
+          className="w-full max-h-[500px] object-cover rounded-xl mb-6"
         />
       )}
-      <div className="text-sm text-gray-500">
-        <p>Terakhir edit: {artikel.terakhir_edit || "Unknown"}</p>
-        <p>Author: {artikel.author_nama}</p>
+
+      {/* Metadata */}
+      <div className="flex flex-wrap justify-between text-sm text-gray-500 mb-6 gap-2">
+        <span>Terakhir edit: {artikel.terakhir_edit || "Unknown"}</span>
+        <span>Author: {artikel.author_nama}</span>
       </div>
 
-      {/* Render TipTap content manually */}
-      <div className="prose space-y-2">
-        {artikel.konten?.content?.map((block: any, index: number) => {
+      {/* Konten */}
+      <div className="prose prose-lg max-w-full mb-6">
+        {artikel.konten?.content?.map((block: any, idx: number) => {
           if (block.type === "paragraph") {
             const text = block.content?.map((c: any) => c.text).join("") ?? "";
-            return <p key={index}>{text}</p>;
+            return <p key={idx}>{text}</p>;
           }
           if (block.type === "image") {
             return (
               <img
-                key={index}
+                key={idx}
                 src={block.attrs?.src}
                 alt={block.attrs?.alt ?? ""}
-                className="max-w-full rounded"
+                className="rounded-lg max-w-full"
               />
             );
           }
@@ -113,13 +128,13 @@ export default function ArtikelDetail() {
         })}
       </div>
 
-      {/* Render tags */}
+      {/* Tags */}
       {artikel.tags.length > 0 && (
-        <div className="flex gap-2 flex-wrap mt-2">
+        <div className="flex flex-wrap gap-2 mt-4">
           {artikel.tags.map((t) => (
             <span
               key={t.tag_id}
-              className="text-xs bg-gray-200 px-2 py-1 rounded"
+              className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm"
             >
               {t.nama_tag}
             </span>

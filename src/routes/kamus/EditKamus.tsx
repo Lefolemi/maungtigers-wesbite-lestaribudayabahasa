@@ -101,66 +101,70 @@ export default function EditKamus() {
   };
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Edit Kontribusi Kamus</h1>
+    <div className="p-4 md:p-8">
+      <div className="bg-white shadow-md rounded-md p-6 md:p-8 max-w-5xl mx-auto">
+        <h1 className="text-2xl font-bold mb-4">Edit Kontribusi Kamus</h1>
 
-      {loading ? (
-        <p>Loading...</p>
-      ) : rows.length === 0 ? (
-        <p>Belum ada kata yang dikontribusikan untuk bahasa ini.</p>
-      ) : (
-        <>
-          <table className="table-auto border-collapse border w-full">
-            <thead>
-              <tr>
-                <th className="border px-2 py-1">Kata</th>
-                <th className="border px-2 py-1">Arti</th>
-                <th className="border px-2 py-1">Contoh</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, index) => (
-                <tr key={row.kata_id}>
-                  <td className="border px-2 py-1">
-                    <input
-                      type="text"
-                      value={row.kata}
-                      onChange={(e) => handleChangeRow(index, "kata", e.target.value)}
-                      className="w-full border rounded px-1 py-0.5"
-                    />
-                  </td>
-                  <td className="border px-2 py-1">
-                    <input
-                      type="text"
-                      value={row.arti}
-                      onChange={(e) => handleChangeRow(index, "arti", e.target.value)}
-                      className="w-full border rounded px-1 py-0.5"
-                    />
-                  </td>
-                  <td className="border px-2 py-1">
-                    <input
-                      type="text"
-                      value={row.contoh}
-                      onChange={(e) => handleChangeRow(index, "contoh", e.target.value)}
-                      className="w-full border rounded px-1 py-0.5"
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {loading ? (
+          <p>Loading...</p>
+        ) : rows.length === 0 ? (
+          <p>Belum ada kata yang dikontribusikan untuk bahasa ini.</p>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="table-auto border-collapse border w-full">
+                <thead>
+                  <tr>
+                    <th className="border px-2 py-1">Kata</th>
+                    <th className="border px-2 py-1">Arti</th>
+                    <th className="border px-2 py-1">Contoh</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row, index) => (
+                    <tr key={row.kata_id}>
+                      <td className="border px-2 py-1">
+                        <input
+                          type="text"
+                          value={row.kata}
+                          onChange={(e) => handleChangeRow(index, "kata", e.target.value)}
+                          className="w-full border rounded px-1 py-0.5"
+                        />
+                      </td>
+                      <td className="border px-2 py-1">
+                        <input
+                          type="text"
+                          value={row.arti}
+                          onChange={(e) => handleChangeRow(index, "arti", e.target.value)}
+                          className="w-full border rounded px-1 py-0.5"
+                        />
+                      </td>
+                      <td className="border px-2 py-1">
+                        <input
+                          type="text"
+                          value={row.contoh}
+                          onChange={(e) => handleChangeRow(index, "contoh", e.target.value)}
+                          className="w-full border rounded px-1 py-0.5"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-          <button
-            className="px-3 py-1 bg-green-600 text-white rounded mt-2"
-            onClick={handleSubmit}
-            disabled={submitting}
-          >
-            Submit for Review
-          </button>
+            <button
+              className="px-4 py-2 bg-sekunder text-white rounded-figma-md mt-4 hover:bg-green-700 disabled:opacity-50"
+              onClick={handleSubmit}
+              disabled={submitting}
+            >
+              Submit for Review
+            </button>
 
-          {warning && <p className="text-sm text-red-600">{warning}</p>}
-        </>
-      )}
+            {warning && <p className="text-sm text-red-600 mt-2">{warning}</p>}
+          </>
+        )}
+      </div>
     </div>
   );
 }

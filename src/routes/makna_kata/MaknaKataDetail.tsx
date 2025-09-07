@@ -55,7 +55,6 @@ export default function MaknaKataDetail() {
         return;
       }
 
-      // fetch tags
       const { data: tagsData } = await supabase
         .from("makna_kata_tag")
         .select(`tag:tag_id(nama_tag)`)
@@ -85,35 +84,44 @@ export default function MaknaKataDetail() {
     fetchEntry();
   }, [id]);
 
-  if (loading) return <p className="p-8">Loading...</p>;
-  if (!entry) return <p className="p-8 text-red-600">Makna Kata tidak ditemukan.</p>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
 
-  const parseInformasi = (informasi: any) => {
-    if (!informasi?.content) return "";
-    return informasi.content
-      .filter((b: any) => b.type === "paragraph")
-      .map((b: any) => b.content?.map((c: any) => c.text).join("") ?? "")
-      .join(" ");
-  };
+  if (!entry)
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <p className="text-red-600 font-medium">Makna Kata tidak ditemukan.</p>
+      </div>
+    );
 
   return (
-    <div className="max-w-3xl mx-auto p-8 space-y-6">
-      <h1 className="text-3xl font-bold">{entry.kata}</h1>
-      <p className="text-sm text-gray-500">
+    <div className="max-w-3xl mx-auto my-10 p-6 bg-white rounded-2xl shadow-xl">
+      {/* Title */}
+      <h1 className="text-4xl font-bold mb-2 text-gray-900">{entry.kata}</h1>
+
+      {/* Metadata */}
+      <p className="text-sm text-gray-500 mb-4">
         Terakhir edit: {entry.terakhir_edit || "Unknown"} | Bahasa: {entry.bahasa_nama}
       </p>
-      <p className="text-gray-700 text-lg mb-2">{entry.arti}</p>
 
+      {/* Arti */}
+      <p className="text-lg text-gray-700 mb-4">{entry.arti}</p>
+
+      {/* Gambar */}
       {entry.gambar && (
         <img
           src={entry.gambar}
           alt={entry.kata}
-          className="w-full max-h-96 object-cover rounded"
+          className="w-full max-h-96 object-cover rounded-xl mb-6"
         />
       )}
 
-      {/* Render informasi manually */}
-      <div className="prose space-y-2">
+      {/* Informasi content */}
+      <div className="prose prose-lg max-w-full mb-6">
         {entry.informasi?.content?.map((block: any, idx: number) => {
           if (block.type === "paragraph") {
             const text = block.content?.map((c: any) => c.text).join("") ?? "";
@@ -125,7 +133,7 @@ export default function MaknaKataDetail() {
                 key={idx}
                 src={block.attrs?.src}
                 alt={block.attrs?.alt ?? ""}
-                className="max-w-full rounded"
+                className="rounded-lg max-w-full"
               />
             );
           }
@@ -133,13 +141,13 @@ export default function MaknaKataDetail() {
         })}
       </div>
 
-      {/* Render tags */}
+      {/* Tags */}
       {entry.tags.length > 0 && (
         <div className="flex gap-2 flex-wrap mt-2">
           {entry.tags.map((t) => (
             <span
               key={t.tag_id}
-              className="text-xs bg-gray-200 px-2 py-1 rounded"
+              className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm"
             >
               {t.nama_tag}
             </span>
@@ -147,6 +155,7 @@ export default function MaknaKataDetail() {
         </div>
       )}
 
+      {/* Author */}
       <p className="text-xs text-gray-400 mt-4">By {entry.author_nama}</p>
     </div>
   );

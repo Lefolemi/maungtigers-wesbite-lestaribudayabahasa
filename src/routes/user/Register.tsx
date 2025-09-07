@@ -22,14 +22,10 @@ export default function Register() {
 
     setLoading(true);
 
-    // Step 1 — Create auth user
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
 
     if (signUpError) {
-      console.error("Auth signup error:", signUpError); // debug
+      console.error("Auth signup error:", signUpError);
       setError(signUpError.message);
       setLoading(false);
       return;
@@ -43,29 +39,22 @@ export default function Register() {
 
     const auth_id = data.user.id;
 
-    // Step 2 — Insert into public.user
-    const { error: insertError } = await supabase
-      .from("user")
-      .insert([
-        {
-          auth_id,
-          nama: nama || null,
-          username: username || null,
-        },
-      ]);
+    const { error: insertError } = await supabase.from("user").insert([
+      {
+        auth_id,
+        nama: nama || null,
+        username: username || null,
+      },
+    ]);
 
     if (insertError) {
-      console.error("Insert error:", insertError); // debug full object
+      console.error("Insert error:", insertError);
       let customMessage = insertError.message;
 
       if (insertError.code === "23505") {
-        if (customMessage.includes("username")) {
-          customMessage = "Username sudah digunakan.";
-        } else if (customMessage.includes("email")) {
-          customMessage = "Email sudah terdaftar.";
-        } else {
-          customMessage = "Data sudah ada di database.";
-        }
+        if (customMessage.includes("username")) customMessage = "Username sudah digunakan.";
+        else if (customMessage.includes("email")) customMessage = "Email sudah terdaftar.";
+        else customMessage = "Data sudah ada di database.";
       } else if (insertError.code === "23514") {
         customMessage = "Data tidak sesuai dengan aturan.";
       }
@@ -79,47 +68,50 @@ export default function Register() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg shadow">
-      <h1 className="text-2xl font-bold mb-4">Daftar Akun</h1>
-      <form onSubmit={handleRegister} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Nama Lengkap"
-          className="w-full p-2 border rounded"
-          value={nama}
-          onChange={(e) => setNama(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Username"
-          className="w-full p-2 border rounded"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full p-2 border rounded"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-2 border rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? "Mendaftar..." : "Daftar"}
-        </button>
-      </form>
-      {error && <p className="text-red-600 mt-4">{error}</p>}
-      {message && <p className="text-green-600 mt-4">{message}</p>}
+    <div className="min-h-screen bg-primer flex items-center justify-center px-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-md">
+        <h1 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">Daftar Akun</h1>
+        <form onSubmit={handleRegister} className="space-y-4">
+          <input
+            type="text"
+            placeholder="Nama Lengkap"
+            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primer focus:border-primer transition"
+            value={nama}
+            onChange={(e) => setNama(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Username"
+            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primer focus:border-primer transition"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primer focus:border-primer transition"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primer focus:border-primer transition"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-tersier text-white py-3 rounded-xl font-semibold hover:bg-tersier/90 transition disabled:opacity-50"
+          >
+            {loading ? "Mendaftar..." : "Daftar"}
+          </button>
+        </form>
+
+        {error && <p className="text-red-600 mt-4 text-center font-medium">{error}</p>}
+        {message && <p className="text-green-600 mt-4 text-center font-medium">{message}</p>}
+      </div>
     </div>
   );
 }

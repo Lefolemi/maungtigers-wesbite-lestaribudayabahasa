@@ -50,7 +50,11 @@ export default function Intro() {
                 {currentSlide.title}
               </h2>
               {currentSlide.content && (
-                <p className="text-gray-700 mb-6 text-center">{currentSlide.content}</p>
+                <div className="text-gray-700 mb-6 text-center space-y-2">
+                  {currentSlide.content.split("\n").map((line, idx) =>
+                    line.trim() ? <p key={idx}>{line.trim()}</p> : null
+                  )}
+                </div>
               )}
               {currentIndex < demoSlides.length - 1 && (
                 <button

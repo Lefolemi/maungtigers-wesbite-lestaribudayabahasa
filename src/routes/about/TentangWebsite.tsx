@@ -5,10 +5,26 @@ export default function TentangWebsite() {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Hero Section */}
-            <div className="relative h-40 bg-primer flex items-center justify-center text-center px-6">
-                <h1 className="text-3xl md:text-4xl font-extrabold text-white drop-shadow-lg">
-                    Tentang BahasaIndahNusantara
-                </h1>
+            <div className="relative h-80 md:h-60 flex items-center justify-center text-center px-6 overflow-hidden">
+            {/* Background image */}
+            <div
+                className="absolute inset-0"
+                style={{
+                backgroundImage: `url('/tentang/mencatat.jpg')`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                transform: "scale(1.2)",
+                }}
+            ></div>
+
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-primer/70"></div> {/* overlay with 70% opacity */}
+
+            {/* Hero Text */}
+            <h1 className="relative text-3xl md:text-4xl font-extrabold text-white drop-shadow-lg z-10">
+                Tentang Bahasa Indah Nusantara
+            </h1>
             </div>
 
             {/* White Box Section: Tentang Website Summary */}
@@ -21,9 +37,7 @@ export default function TentangWebsite() {
                     Tentang Website
                     </h2>
                     <p className="text-gray-700 max-w-xl">
-                    Website ini dibuat untuk melestarikan bahasa dan budaya daerah Nusantara. 
-                    Melalui kamus, cerita, dan makna kata, kami ingin menyediakan wadah yang mudah diakses 
-                    agar pengetahuan budaya tetap hidup dan tidak hilang seiring waktu.
+                    Website ini dibuat untuk melestarikan bahasa-bahasa di Indonesia, khususnya banyak bahasa yang perlahan mulai pudar atau mungkin sudah hampir punah. Melalui kamus digital, cerita, dan makna kata, kami menyediakan wadah agar pengetahuan bahasa dan budaya tetap hidup. Dengan ini, generasi muda dapat mengenal, menggunakan, dan mewariskan bahasa daerah sebelum hilang selamanya.
                     </p>
                     <Link
                     to="/"
@@ -36,7 +50,7 @@ export default function TentangWebsite() {
                 {/* Image - 30% */}
                 <div className="md:w-3/10 flex items-center">
                     <img
-                    src="/images/tentang-website.png" // replace with your image
+                    src="/tentang/bicara.jfif" // replace with your image
                     alt="Tentang Website Illustration"
                     className="w-full h-full rounded-figma-lg object-cover shadow-lg"
                     />
@@ -62,7 +76,7 @@ export default function TentangWebsite() {
                     </div>
                     <div className="bg-white text-gray-700 rounded-figma-md p-6 shadow-md">
                     <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    Menjadi jembatan digital yang menjaga setiap bahasa daerah Nusantara tetap hidup, bahkan yang hampir punah, agar warisan budaya tidak hilang.
                     </p>
                     </div>
                 </div>
@@ -74,7 +88,7 @@ export default function TentangWebsite() {
                     </div>
                     <div className="bg-white text-gray-700 rounded-figma-md p-6 shadow-md">
                     <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    Website ini hadir untuk mendokumentasikan dan menyebarkan bahasa-bahasa daerah Nusantara melalui kamus digital, cerita, dan makna kata. Kami berupaya agar generasi muda dapat belajar, menggunakan, dan mewariskan bahasa lokal dalam kehidupan sehari-hari. Dengan pendekatan yang mudah diakses dan interaktif, kami ingin mendorong masyarakat untuk lebih mencintai bahasa mereka sendiri, meningkatkan kesadaran akan pentingnya preservasi bahasa, serta menjaga agar setiap kata, cerita, dan tradisi tetap hidup dan dapat dinikmati oleh generasi mendatang.
                     </p>
                     </div>
                 </div>
@@ -110,7 +124,7 @@ export default function TentangWebsite() {
                 <div className="md:w-7/10 space-y-4 text-left">
                     <h3 className="text-2xl md:text-3xl font-bold text-primer">Rezon</h3>
                     <p className="text-gray-700 max-w-xl">
-                    Rezon adalah anggota tim yang fokus pada pengembangan konten dan riset bahasa daerah.
+                    Rezon adalah ketua tim yang fokus pada pengembangan konten dan pembuatan website.
                     </p>
                 </div>
                 </div>
@@ -130,7 +144,7 @@ export default function TentangWebsite() {
                 <div className="md:w-7/10 space-y-4 text-left">
                     <h3 className="text-2xl md:text-3xl font-bold text-primer">Zhahir</h3>
                     <p className="text-gray-700 max-w-xl">
-                    Zhahir berperan dalam desain dan manajemen proyek, memastikan website mudah diakses oleh semua orang.
+                    Zhahir berperan dalam desain dan manajemen proyek, memastikan UX bisa mudah dibaca.
                     </p>
                 </div>
                 </div>
@@ -150,7 +164,7 @@ export default function TentangWebsite() {
                 <div className="md:w-7/10 space-y-4 text-left">
                     <h3 className="text-2xl md:text-3xl font-bold text-primer">Cintya</h3>
                     <p className="text-gray-700 max-w-xl">
-                    Cintya bertanggung jawab atas dokumentasi konten dan menjaga kualitas materi budaya yang dipublikasikan.
+                    Cintya bertanggung jawab atas dokumentasi konten dan mencari informasi tentang materi di Internet.
                     </p>
                 </div>
                 </div>

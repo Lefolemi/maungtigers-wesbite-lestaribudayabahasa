@@ -44,7 +44,6 @@ export default function Login() {
       emailToUse = data.email;
     }
 
-    // Step 3: login with email + password
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: emailToUse,
       password,
@@ -56,7 +55,6 @@ export default function Login() {
       return;
     }
 
-    // Step 4: get logged in user data
     const { data: userData, error: userError } = await supabase.auth.getUser();
     if (userError || !userData.user) {
       setError("Gagal mengambil data pengguna.");
@@ -64,7 +62,6 @@ export default function Login() {
       return;
     }
 
-    // Step 5: fetch numeric user_id from public.user using auth_id
     const { data: userRecord, error: userRecordError } = await supabase
       .from("user")
       .select("user_id")
@@ -79,7 +76,6 @@ export default function Login() {
 
     const numericUserId = userRecord.user_id;
 
-    // Step 6: check if user is suspended
     const { data: activeSuspension, error: suspendError } = await supabase
       .from("suspend_user")
       .select("*")
@@ -88,7 +84,7 @@ export default function Login() {
       .limit(1)
       .single();
 
-    if (suspendError && suspendError.code !== "PGRST116") { // ignore "no rows found" error
+    if (suspendError && suspendError.code !== "PGRST116") {
       console.error("Failed to check suspension:", suspendError.message);
       setLoading(false);
       return;
@@ -102,7 +98,6 @@ export default function Login() {
       return;
     }
 
-    // Step 7: fetch username from public.user table
     const { data: profileData, error: profileError } = await supabase
       .from("user")
       .select("username")
@@ -120,33 +115,36 @@ export default function Login() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg shadow">
-      <h1 className="text-2xl font-bold mb-4">Login</h1>
-      <form onSubmit={handleLogin} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Email atau Username"
-          className="w-full p-2 border rounded"
-          value={identifier}
-          onChange={(e) => setIdentifier(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-2 border rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? "Masuk..." : "Masuk"}
-        </button>
-      </form>
-      {error && <p className="text-red-600 mt-4">{error}</p>}
-      {message && <p className="text-green-600 mt-4">{message}</p>}
+    <div className="min-h-screen bg-primer flex items-center justify-center px-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-md">
+        <h1 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">Masuk</h1>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <input
+            type="text"
+            placeholder="Email atau Username"
+            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primer focus:border-primer transition"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primer focus:border-primer transition"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-tersier text-white py-3 rounded-xl font-semibold hover:bg-tersier/90 transition disabled:opacity-50"
+          >
+            {loading ? "Masuk..." : "Masuk"}
+          </button>
+        </form>
+
+        {error && <p className="text-red-600 mt-4 text-center font-medium">{error}</p>}
+        {message && <p className="text-green-600 mt-4 text-center font-medium">{message}</p>}
+      </div>
     </div>
   );
 }

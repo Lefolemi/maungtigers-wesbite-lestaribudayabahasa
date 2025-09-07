@@ -166,7 +166,7 @@ export default function KontribusiArtikel() {
       <div className="my-4">
         <button
           onClick={() => navigate("/artikel/buat")}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="px-4 py-2 bg-sekunder text-white rounded hover:bg-sekunder/90"
         >
           Buat Artikel Baru
         </button>
@@ -218,14 +218,14 @@ export default function KontribusiArtikel() {
                 onClick={() =>
                   navigate("/artikel/preview", { state: { artikel: a } })
                 }
-                className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="px-3 py-1 bg-sekunder text-white rounded hover:bg-sekunder/90"
               >
                 Lihat
               </button>
 
               <button
                 onClick={() => navigate(`/artikel/edit/${a.slug}`)}
-                className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                className="px-3 py-1 bg-tersier text-white rounded hover:bg-tersier/90"
               >
                 Edit
               </button>

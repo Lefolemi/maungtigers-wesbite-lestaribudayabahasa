@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { supabase } from "../supabase"; // Corrected import path
+import { supabase } from "../supabase";
 
 interface UserData {
-  id: string; // This is auth_id (UUID from supabase.auth)
-  user_id: number; // PK from public.user
+  id: string; // auth_id
+  user_id: number;
   email: string | null;
   username: string | null;
   nama: string | null;
@@ -14,23 +14,25 @@ interface UserData {
 
 interface UserSessionContextType {
   user: UserData | null;
-  loading: boolean; // Add loading state here
+  loading: boolean;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const UserSessionContext = createContext<UserSessionContextType>({
   user: null,
-  loading: true, // Set default loading state to true
+  loading: true,
   logout: async () => {},
+  refreshUser: async () => {},
 });
 
 export function UserSessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(true); // Initial loading state is true
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadUser = async () => {
-      setLoading(true);
+  const loadUser = async () => {
+    setLoading(true);
+    try {
       const { data: { user: authUser } } = await supabase.auth.getUser();
 
       if (!authUser) {
@@ -55,11 +57,25 @@ export function UserSessionProvider({ children }: { children: ReactNode }) {
         role: profile?.role ?? null,
         tanggal_dibuat: profile?.tanggal_dibuat ?? null,
       });
-
+    } catch (err) {
+      console.error("Failed to load user:", err);
+      setUser(null);
+    } finally {
       setLoading(false);
-    };
+    }
+  };
 
+  useEffect(() => {
     loadUser();
+
+    // Listen to auth state changes and reload user automatically
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      loadUser();
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   const logout = async () => {
@@ -68,7 +84,7 @@ export function UserSessionProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <UserSessionContext.Provider value={{ user, loading, logout }}>
+    <UserSessionContext.Provider value={{ user, loading, logout, refreshUser: loadUser }}>
       {children}
     </UserSessionContext.Provider>
   );

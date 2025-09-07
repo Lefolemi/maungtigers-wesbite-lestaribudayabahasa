@@ -100,7 +100,7 @@ export default function KamusDashboard() {
   const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042"];
 
   const bahasaOptions = [
-    { value: "all", label: "🌐 Semua Bahasa" },
+    { value: "all", label: "Semua Bahasa" },
     ...bahasaList.map(b => ({ value: b.bahasa_id, label: b.nama_bahasa })),
   ];
 
@@ -113,7 +113,7 @@ export default function KamusDashboard() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold mb-4">📘 Dashboard Kamus</h1>
+      <h1 className="text-2xl font-bold mb-4">Dashboard Kamus</h1>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4 mb-4 w-full md:w-auto">
